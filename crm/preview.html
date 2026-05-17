@@ -3,10 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>One System CRM — Aperçu</title>
-<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<title>One System CRM</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -14,408 +11,425 @@
   --success:#16a34a;--success-light:#dcfce7;
   --warning:#d97706;--warning-light:#fef3c7;
   --danger:#dc2626;--danger-light:#fee2e2;
-  --sidebar-bg:#1e293b;--bg:#f1f5f9;--surface:#ffffff;
-  --border:#e2e8f0;--text:#0f172a;--text-muted:#64748b;
-  --radius:8px;--shadow:0 1px 3px rgba(0,0,0,.1);--shadow-md:0 4px 6px -1px rgba(0,0,0,.1)
+  --sidebar:#1e293b;--bg:#f1f5f9;--surface:#fff;
+  --border:#e2e8f0;--text:#0f172a;--muted:#64748b;
+  --r:8px;--sh:0 1px 3px rgba(0,0,0,.1)
 }
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:14px;color:var(--text);background:var(--bg);line-height:1.5}
-.layout{display:flex;min-height:100vh}
-.sidebar{width:240px;flex-shrink:0;background:var(--sidebar-bg);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
-.sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
-.sidebar-logo .brand{font-size:18px;font-weight:700;color:#fff}
-.sidebar-logo .sub{font-size:11px;color:#94a3b8;margin-top:2px}
-.sidebar-nav{flex:1;padding:12px 8px}
-.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:6px;color:#94a3b8;text-decoration:none;font-size:13.5px;font-weight:500;transition:all .15s;margin-bottom:2px;cursor:pointer;border:none;background:none;width:100%;text-align:left}
-.nav-item:hover{background:rgba(255,255,255,.07);color:#fff}
-.nav-item.active{background:var(--primary);color:#fff}
+
+/* ── Layout ── */
+#app{display:flex;min-height:100vh}
+.sidebar{width:240px;flex-shrink:0;background:var(--sidebar);display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;z-index:10}
+.logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+.logo .brand{font-size:18px;font-weight:700;color:#fff}
+.logo .sub{font-size:11px;color:#94a3b8;margin-top:2px}
+nav{flex:1;padding:12px 8px}
+.nav-btn{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:6px;color:#94a3b8;font-size:13.5px;font-weight:500;width:100%;border:none;background:none;cursor:pointer;margin-bottom:2px;text-align:left;transition:all .15s}
+.nav-btn:hover{background:rgba(255,255,255,.07);color:#fff}
+.nav-btn.active{background:var(--primary);color:#fff}
 .nav-icon{font-size:16px;width:20px;text-align:center}
-.main-content{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh}
-.page{padding:32px;flex:1}
-.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
-.page-title{font-size:22px;font-weight:700}
-.page-subtitle{font-size:13px;color:var(--text-muted);margin-top:2px}
-.card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border)}
-.card-body{padding:20px}
-.card-header{padding:16px 20px;border-bottom:1px solid var(--border);font-weight:600}
+.sidebar-foot{padding:12px 8px}
+.main{margin-left:240px;flex:1}
+.page{padding:32px}
+
+/* ── Page header ── */
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.ptitle{font-size:22px;font-weight:700}
+.psub{font-size:13px;color:var(--muted);margin-top:2px}
+
+/* ── Card ── */
+.card{background:var(--surface);border-radius:var(--r);box-shadow:var(--sh);border:1px solid var(--border)}
+.card-hd{padding:16px 20px;border-bottom:1px solid var(--border);font-weight:600;font-size:14px}
+
+/* ── Stat grid ── */
 .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
-.stat-card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border);padding:20px;display:flex;align-items:flex-start;gap:16px}
-.stat-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-.stat-icon.blue{background:var(--primary-light)}.stat-icon.green{background:var(--success-light)}.stat-icon.amber{background:var(--warning-light)}.stat-icon.red{background:var(--danger-light)}
-.stat-label{font-size:12px;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:.04em}
-.stat-value{font-size:26px;font-weight:700;margin-top:4px}
-.table-wrap{overflow-x:auto}
+.stat{background:var(--surface);border-radius:var(--r);box-shadow:var(--sh);border:1px solid var(--border);padding:20px;display:flex;align-items:flex-start;gap:16px}
+.stat-ic{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.ic-blue{background:var(--primary-light)}.ic-green{background:var(--success-light)}.ic-amber{background:var(--warning-light)}.ic-red{background:var(--danger-light)}
+.stat-lbl{font-size:11.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.stat-val{font-size:26px;font-weight:700;margin-top:4px}
+
+/* ── Table ── */
+.tw{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13.5px}
-thead th{text-align:left;padding:10px 16px;font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);background:#f8fafc;border-bottom:1px solid var(--border)}
-tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
-tbody tr:last-child{border-bottom:none}
+th{text-align:left;padding:10px 16px;font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:#f8fafc;border-bottom:1px solid var(--border)}
+tr{border-bottom:1px solid var(--border)}
+tr:last-child{border-bottom:none}
 tbody tr:hover{background:#f8fafc}
 td{padding:12px 16px;vertical-align:middle}
+
+/* ── Badge ── */
 .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600}
-.badge-nouveau{background:#e0f2fe;color:#0369a1}.badge-en_cours{background:var(--warning-light);color:#92400e}.badge-gagne{background:var(--success-light);color:#14532d}.badge-perdu{background:#f1f5f9;color:#475569}
-.badge-en_attente{background:var(--warning-light);color:#92400e}.badge-paye{background:var(--success-light);color:#14532d}
-.badge-actif{background:var(--success-light);color:#14532d}.badge-inactif{background:#f1f5f9;color:#475569}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:6px;font-size:13.5px;font-weight:500;cursor:pointer;border:1px solid transparent;transition:all .15s}
-.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark)}
-.btn-secondary{background:var(--surface);color:var(--text);border-color:var(--border)}.btn-secondary:hover{background:#f8fafc}
-.btn-success{background:var(--success);color:#fff}.btn-success:hover{background:#15803d}
-.btn-danger{background:var(--danger);color:#fff}
-.btn-sm{padding:5px 10px;font-size:12.5px}
-.btn-ghost{background:transparent;color:var(--text-muted);border-color:transparent}.btn-ghost:hover{background:#f1f5f9;color:var(--text)}
-.search-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--surface);min-width:220px}
-.search-bar input{border:none;outline:none;font-size:13.5px;flex:1;background:transparent;color:var(--text)}
-.form-group{margin-bottom:16px}
-.form-label{display:block;font-size:13px;font-weight:500;margin-bottom:6px}
-.form-label span{color:var(--danger)}
-.form-control{display:block;width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13.5px;color:var(--text);background:var(--surface);transition:border-color .15s;outline:none}
-.form-control:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.form-actions{display:flex;justify-content:flex-end;gap:8px;padding-top:8px;border-top:1px solid var(--border);margin-top:8px}
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:200;padding:16px}
-.modal{background:var(--surface);border-radius:10px;box-shadow:var(--shadow-md);width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
-.modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
-.modal-title{font-size:16px;font-weight:600}
-.modal-body{padding:20px}
-.fw-600{font-weight:600}.text-muted{color:var(--text-muted)}.text-sm{font-size:12.5px}
-.flex{display:flex}.items-center{align-items:center}.gap-2{gap:8px}
-.login-wrap{min-height:100vh;background:var(--bg);display:flex;align-items:center;justify-content:center}
+.b-nouveau{background:#e0f2fe;color:#0369a1}
+.b-en_cours{background:var(--warning-light);color:#92400e}
+.b-gagne{background:var(--success-light);color:#14532d}
+.b-perdu{background:#f1f5f9;color:#475569}
+.b-attente{background:var(--warning-light);color:#92400e}
+.b-paye{background:var(--success-light);color:#14532d}
+.b-actif{background:var(--success-light);color:#14532d}
+.b-inactif{background:#f1f5f9;color:#475569}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:6px;font-size:13.5px;font-weight:500;cursor:pointer;border:1px solid transparent;transition:all .15s;font-family:inherit}
+.btn-p{background:var(--primary);color:#fff;border-color:var(--primary)}.btn-p:hover{background:var(--primary-dark)}
+.btn-s{background:var(--surface);color:var(--text);border-color:var(--border)}.btn-s:hover{background:#f8fafc}
+.btn-ok{background:var(--success);color:#fff}.btn-ok:hover{background:#15803d}
+.btn-d{background:var(--danger);color:#fff}.btn-d:hover{background:#b91c1c}
+.btn-g{background:transparent;color:var(--muted);border-color:transparent}.btn-g:hover{background:#f1f5f9}
+.sm{padding:5px 10px;font-size:12.5px}
+
+/* ── Search ── */
+.search{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--surface);min-width:200px}
+.search input{border:none;outline:none;font-size:13.5px;flex:1;background:transparent;color:var(--text)}
+
+/* ── Form ── */
+.fg{margin-bottom:16px}
+.fl{display:block;font-size:13px;font-weight:500;margin-bottom:6px}
+.fl span{color:var(--danger)}
+.fc{display:block;width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13.5px;color:var(--text);background:var(--surface);outline:none;font-family:inherit;transition:border-color .15s}
+.fc:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fa{display:flex;justify-content:flex-end;gap:8px;padding-top:12px;border-top:1px solid var(--border);margin-top:12px}
+
+/* ── Modal ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:200;padding:16px}
+.modal{background:var(--surface);border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,.15);width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
+.mh{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.mt{font-size:16px;font-weight:600}
+.mb{padding:20px}
+
+/* ── Misc ── */
+.fw{font-weight:600}.tm{color:var(--muted)}.tsm{font-size:12.5px}
+.row{display:flex;align-items:center;gap:8px}
 .alert{padding:12px 16px;border-radius:6px;font-size:13.5px;margin-bottom:16px;border-left:4px solid}
-.alert-info{background:#e0f2fe;border-color:#0369a1;color:#0c4a6e}
-.tag-demo{position:fixed;top:12px;right:12px;background:#7c3aed;color:#fff;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;z-index:9999;letter-spacing:.04em}
-select.form-control{cursor:pointer}
+.a-info{background:#e0f2fe;border-color:#0369a1;color:#0c4a6e}
+.a-err{background:var(--danger-light);border-color:var(--danger);color:#7f1d1d}
+.hidden{display:none!important}
+.demo-tag{position:fixed;top:12px;right:12px;background:#7c3aed;color:#fff;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;z-index:999;letter-spacing:.04em;pointer-events:none}
+
+/* ── Login ── */
+.login-wrap{min-height:100vh;background:var(--bg);display:flex;align-items:center;justify-content:center}
+.login-box{width:100%;max-width:400px;padding:0 16px}
+.login-logo{text-align:center;margin-bottom:32px}
+.login-logo .icon{font-size:44px;margin-bottom:8px}
+.login-logo .name{font-size:22px;font-weight:700}
+.login-logo .sub{color:var(--muted);font-size:13px;margin-top:4px}
+
+/* ── Two-col stat row ── */
+.stat2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
 </style>
 </head>
 <body>
-<div id="root"></div>
-<div class="tag-demo">APERÇU — données fictives</div>
-<script type="text/babel">
-const { useState } = React;
 
-// ── Mock data ─────────────────────────────────────────────────────────────────
+<div class="demo-tag">APERÇU — données fictives</div>
+
+<!-- LOGIN -->
+<div id="login-screen" class="login-wrap">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="icon">💼</div>
+      <div class="name">One System CRM</div>
+      <div class="sub">Connectez-vous pour accéder au CRM</div>
+    </div>
+    <div class="card">
+      <div style="padding:20px">
+        <div class="alert a-info">🔑 Identifiants démo : <strong>admin</strong> / <strong>demo</strong></div>
+        <div id="login-err" class="alert a-err hidden"></div>
+        <div class="fg"><label class="fl">Identifiant</label><input class="fc" id="inp-user" placeholder="admin" autocomplete="username"/></div>
+        <div class="fg"><label class="fl">Mot de passe</label><input class="fc" id="inp-pass" type="password" placeholder="••••" autocomplete="current-password"/></div>
+        <button class="btn btn-p" style="width:100%;justify-content:center;margin-top:4px" onclick="doLogin()">Se connecter</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+  <aside class="sidebar">
+    <div class="logo"><div class="brand">One System</div><div class="sub">CRM Apporteurs d'affaires</div></div>
+    <nav>
+      <button class="nav-btn active" data-page="dashboard"  onclick="go('dashboard')"><span class="nav-icon">📊</span>Tableau de bord</button>
+      <button class="nav-btn"        data-page="apporteurs" onclick="go('apporteurs')"><span class="nav-icon">👥</span>Apporteurs</button>
+      <button class="nav-btn"        data-page="opportunites" onclick="go('opportunites')"><span class="nav-icon">🎯</span>Opportunités</button>
+      <button class="nav-btn"        data-page="commissions" onclick="go('commissions')"><span class="nav-icon">💰</span>Commissions</button>
+    </nav>
+    <div class="sidebar-foot">
+      <button class="nav-btn" onclick="logout()"><span class="nav-icon">🚪</span>Déconnexion</button>
+    </div>
+    <div style="padding:8px 20px 16px;font-size:11px;color:#475569">v1.0.0 — One System © 2025</div>
+  </aside>
+  <main class="main">
+    <div id="page-dashboard" class="page"></div>
+    <div id="page-apporteurs" class="page hidden"></div>
+    <div id="page-opportunites" class="page hidden"></div>
+    <div id="page-commissions" class="page hidden"></div>
+  </main>
+</div>
+
+<!-- MODAL -->
+<div id="modal-overlay" class="overlay hidden" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="mh"><span class="mt" id="modal-title"></span><button class="btn btn-g sm" onclick="closeModal()">✕</button></div>
+    <div class="mb" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ── Data ─────────────────────────────────────────────────────────────────────
 const APPORTEURS = [
-  {id:1,prenom:"Sophie",nom:"Martin",email:"s.martin@nexusco.fr",telephone:"06 12 34 56 78",societe:"NexusCo",taux_commission:12,actif:true,date_creation:"2024-01-15",nombre_opportunites:4,ca_total:87000},
-  {id:2,prenom:"Thomas",nom:"Durand",email:"t.durand@td-conseil.fr",telephone:"07 23 45 67 89",societe:"TD Conseil",taux_commission:10,actif:true,date_creation:"2024-02-20",nombre_opportunites:6,ca_total:142500},
-  {id:3,prenom:"Marie",nom:"Leblanc",email:"m.leblanc@mlpartners.com",telephone:"06 87 65 43 21",societe:"ML Partners",taux_commission:8,actif:true,date_creation:"2024-03-10",nombre_opportunites:3,ca_total:35000},
-  {id:4,prenom:"Nicolas",nom:"Bernard",email:"n.bernard@freelance.fr",telephone:"",societe:"",taux_commission:15,actif:false,date_creation:"2023-11-05",nombre_opportunites:2,ca_total:18000},
-  {id:5,prenom:"Camille",nom:"Petit",email:"c.petit@cbiz.fr",telephone:"06 55 44 33 22",societe:"C-Biz",taux_commission:11,actif:true,date_creation:"2024-04-01",nombre_opportunites:2,ca_total:63000},
+  {id:1,prenom:"Sophie",nom:"Martin",email:"s.martin@nexusco.fr",tel:"06 12 34 56 78",societe:"NexusCo",taux:12,actif:true,date:"15/01/2024",nbopp:4,ca:87000},
+  {id:2,prenom:"Thomas",nom:"Durand",email:"t.durand@td-conseil.fr",tel:"07 23 45 67 89",societe:"TD Conseil",taux:10,actif:true,date:"20/02/2024",nbopp:6,ca:142500},
+  {id:3,prenom:"Marie",nom:"Leblanc",email:"m.leblanc@mlpartners.com",tel:"06 87 65 43 21",societe:"ML Partners",taux:8,actif:true,date:"10/03/2024",nbopp:3,ca:35000},
+  {id:4,prenom:"Nicolas",nom:"Bernard",email:"n.bernard@freelance.fr",tel:"",societe:"",taux:15,actif:false,date:"05/11/2023",nbopp:2,ca:18000},
+  {id:5,prenom:"Camille",nom:"Petit",email:"c.petit@cbiz.fr",tel:"06 55 44 33 22",societe:"C-Biz",taux:11,actif:true,date:"01/04/2024",nbopp:2,ca:63000},
 ];
 const OPPORTUNITES = [
-  {id:1,apporteur_id:2,apporteur_nom:"Durand",apporteur_prenom:"Thomas",nom_prospect:"Lemaire SA",societe_prospect:"Lemaire SA",montant_estime:45000,statut:"gagne",date_creation:"2024-09-12",date_cloture:"2024-11-03"},
-  {id:2,apporteur_id:1,apporteur_nom:"Martin",apporteur_prenom:"Sophie",nom_prospect:"Fabrice Chauvin",societe_prospect:"Chauvin & Fils",montant_estime:22000,statut:"en_cours",date_creation:"2024-10-01",date_cloture:null},
-  {id:3,apporteur_id:5,apporteur_nom:"Petit",apporteur_prenom:"Camille",nom_prospect:"Groupe Horizon",societe_prospect:"Groupe Horizon SAS",montant_estime:63000,statut:"gagne",date_creation:"2024-08-20",date_cloture:"2024-10-15"},
-  {id:4,apporteur_id:2,apporteur_nom:"Durand",apporteur_prenom:"Thomas",nom_prospect:"Optim'Pro",societe_prospect:"Optim'Pro",montant_estime:38000,statut:"en_cours",date_creation:"2024-11-05",date_cloture:null},
-  {id:5,apporteur_id:1,apporteur_nom:"Martin",apporteur_prenom:"Sophie",nom_prospect:"Renault Distribution Est",societe_prospect:"RDE",montant_estime:87000,statut:"gagne",date_creation:"2024-07-15",date_cloture:"2024-09-30"},
-  {id:6,apporteur_id:3,apporteur_nom:"Leblanc",apporteur_prenom:"Marie",nom_prospect:"Startup Innov",societe_prospect:"",montant_estime:12000,statut:"perdu",date_creation:"2024-10-20",date_cloture:"2024-11-10"},
-  {id:7,apporteur_id:2,apporteur_nom:"Durand",apporteur_prenom:"Thomas",nom_prospect:"Logis & Co",societe_prospect:"Logis & Co",montant_estime:59500,statut:"gagne",date_creation:"2024-06-01",date_cloture:"2024-08-12"},
-  {id:8,apporteur_id:4,apporteur_nom:"Bernard",apporteur_prenom:"Nicolas",nom_prospect:"Axel Moreau",societe_prospect:"AM Conseil",montant_estime:18000,statut:"nouveau",date_creation:"2024-11-15",date_cloture:null},
+  {id:1,apporteur:"Thomas Durand",prospect:"Lemaire SA",societe:"Lemaire SA",montant:45000,statut:"gagne",creation:"12/09/2024",cloture:"03/11/2024"},
+  {id:2,apporteur:"Sophie Martin",prospect:"Fabrice Chauvin",societe:"Chauvin & Fils",montant:22000,statut:"en_cours",creation:"01/10/2024",cloture:"—"},
+  {id:3,apporteur:"Camille Petit",prospect:"Groupe Horizon",societe:"Groupe Horizon SAS",montant:63000,statut:"gagne",creation:"20/08/2024",cloture:"15/10/2024"},
+  {id:4,apporteur:"Thomas Durand",prospect:"Optim'Pro",societe:"Optim'Pro",montant:38000,statut:"en_cours",creation:"05/11/2024",cloture:"—"},
+  {id:5,apporteur:"Sophie Martin",prospect:"Renault Distribution Est",societe:"RDE",montant:87000,statut:"gagne",creation:"15/07/2024",cloture:"30/09/2024"},
+  {id:6,apporteur:"Marie Leblanc",prospect:"Startup Innov",societe:"",montant:12000,statut:"perdu",creation:"20/10/2024",cloture:"10/11/2024"},
+  {id:7,apporteur:"Thomas Durand",prospect:"Logis & Co",societe:"Logis & Co",montant:59500,statut:"gagne",creation:"01/06/2024",cloture:"12/08/2024"},
+  {id:8,apporteur:"Nicolas Bernard",prospect:"Axel Moreau",societe:"AM Conseil",montant:18000,statut:"nouveau",creation:"15/11/2024",cloture:"—"},
 ];
-const COMMISSIONS = [
-  {id:1,opportunite_id:1,apporteur_id:2,apporteur_nom:"Durand",apporteur_prenom:"Thomas",prospect_nom:"Lemaire SA",prospect_societe:"Lemaire SA",montant:4500,montant_affaire:45000,statut_paiement:"paye",date_calcul:"2024-11-03",date_paiement:"2024-11-30"},
-  {id:2,opportunite_id:3,apporteur_id:5,apporteur_nom:"Petit",apporteur_prenom:"Camille",prospect_nom:"Groupe Horizon",prospect_societe:"Groupe Horizon SAS",montant:6930,montant_affaire:63000,statut_paiement:"en_attente",date_calcul:"2024-10-15",date_paiement:null},
-  {id:3,opportunite_id:5,apporteur_id:1,apporteur_nom:"Martin",apporteur_prenom:"Sophie",prospect_nom:"Renault Distribution Est",prospect_societe:"RDE",montant:10440,montant_affaire:87000,statut_paiement:"en_attente",date_calcul:"2024-09-30",date_paiement:null},
-  {id:4,opportunite_id:7,apporteur_id:2,apporteur_nom:"Durand",apporteur_prenom:"Thomas",prospect_nom:"Logis & Co",prospect_societe:"Logis & Co",montant:5950,montant_affaire:59500,statut_paiement:"paye",date_calcul:"2024-08-12",date_paiement:"2024-09-01"},
+let COMMISSIONS = [
+  {id:1,apporteur:"Thomas Durand",prospect:"Lemaire SA",societe:"Lemaire SA",affaire:45000,montant:4500,statut:"paye",calcule:"03/11/2024",paye:"30/11/2024"},
+  {id:2,apporteur:"Camille Petit",prospect:"Groupe Horizon",societe:"Groupe Horizon SAS",affaire:63000,montant:6930,statut:"attente",calcule:"15/10/2024",paye:"—"},
+  {id:3,apporteur:"Sophie Martin",prospect:"Renault Distribution Est",societe:"RDE",affaire:87000,montant:10440,statut:"attente",calcule:"30/09/2024",paye:"—"},
+  {id:4,apporteur:"Thomas Durand",prospect:"Logis & Co",societe:"Logis & Co",affaire:59500,montant:5950,statut:"paye",calcule:"12/08/2024",paye:"01/09/2024"},
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-const fmt = n => new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(n);
-const fmtDate = d => d ? new Date(d).toLocaleDateString("fr-FR") : "—";
+const € = n => new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(n);
+const SLABELS = {nouveau:"Nouveau",en_cours:"En cours",gagne:"Gagné",perdu:"Perdu"};
+const SCLS    = {nouveau:"b-nouveau",en_cours:"b-en_cours",gagne:"b-gagne",perdu:"b-perdu"};
+const badge = (s,lbl,cls) => `<span class="badge ${cls}">${lbl}</span>`;
 
-const STATUT_LABELS = {nouveau:"Nouveau",en_cours:"En cours",gagne:"Gagné",perdu:"Perdu"};
+// ── Auth ──────────────────────────────────────────────────────────────────────
+function doLogin(){
+  const u=document.getElementById("inp-user").value;
+  const p=document.getElementById("inp-pass").value;
+  const err=document.getElementById("login-err");
+  if(u==="admin"&&p==="demo"){
+    document.getElementById("login-screen").classList.add("hidden");
+    document.getElementById("app").classList.remove("hidden");
+    renderDashboard(); renderApporteurs(); renderOpportunites(); renderCommissions();
+  } else {
+    err.textContent="Identifiants incorrects — essayez admin / demo";
+    err.classList.remove("hidden");
+  }
+}
+document.getElementById("inp-pass").addEventListener("keydown",e=>{ if(e.key==="Enter") doLogin(); });
+document.getElementById("inp-user").addEventListener("keydown",e=>{ if(e.key==="Enter") doLogin(); });
 
-function Badge({statut}){
-  return <span className={`badge badge-${statut}`}>{STATUT_LABELS[statut]||statut}</span>;
+function logout(){
+  document.getElementById("app").classList.add("hidden");
+  document.getElementById("login-screen").classList.remove("hidden");
+  document.getElementById("inp-user").value="";
+  document.getElementById("inp-pass").value="";
+  document.getElementById("login-err").classList.add("hidden");
 }
 
-// ── Login ─────────────────────────────────────────────────────────────────────
-function Login({onLogin}){
-  const [u,setU]=useState("");const[p,setP]=useState("");const[err,setErr]=useState(null);
-  const submit=e=>{
-    e.preventDefault();
-    if(u==="admin"&&p==="demo"){onLogin();}
-    else setErr("Identifiants incorrects — essayez admin / demo");
-  };
-  return(
-    <div className="login-wrap">
-      <div style={{width:"100%",maxWidth:400,padding:"0 16px"}}>
-        <div style={{textAlign:"center",marginBottom:32}}>
-          <div style={{fontSize:40,marginBottom:8}}>💼</div>
-          <div style={{fontSize:22,fontWeight:700}}>One System CRM</div>
-          <div style={{color:"var(--text-muted)",marginTop:4,fontSize:13}}>Connectez-vous pour accéder au CRM</div>
-        </div>
-        <div className="card"><div className="card-body">
-          <div className="alert alert-info">🔑 Identifiants démo : <strong>admin</strong> / <strong>demo</strong></div>
-          {err&&<div className="alert" style={{background:"var(--danger-light)",borderColor:"var(--danger)",color:"#7f1d1d"}}>{err}</div>}
-          <form onSubmit={submit}>
-            <div className="form-group"><label className="form-label">Identifiant</label><input className="form-control" value={u} onChange={e=>setU(e.target.value)} autoFocus/></div>
-            <div className="form-group"><label className="form-label">Mot de passe</label><input className="form-control" type="password" value={p} onChange={e=>setP(e.target.value)}/></div>
-            <button type="submit" className="btn btn-primary" style={{width:"100%",justifyContent:"center",marginTop:8}}>Se connecter</button>
-          </form>
-        </div></div>
-      </div>
-    </div>
-  );
+// ── Navigation ────────────────────────────────────────────────────────────────
+let curPage="dashboard";
+function go(page){
+  document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+  document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));
+  document.getElementById("page-"+page).classList.remove("hidden");
+  curPage=page;
 }
 
-// ── Sidebar ───────────────────────────────────────────────────────────────────
-const NAV=[{page:"dashboard",icon:"📊",label:"Tableau de bord"},{page:"apporteurs",icon:"👥",label:"Apporteurs"},{page:"opportunites",icon:"🎯",label:"Opportunités"},{page:"commissions",icon:"💰",label:"Commissions"}];
-
-function Sidebar({page,setPage,onLogout}){
-  return(
-    <aside className="sidebar">
-      <div className="sidebar-logo"><div className="brand">One System</div><div className="sub">CRM Apporteurs d'affaires</div></div>
-      <nav className="sidebar-nav">
-        {NAV.map(({page:p,icon,label})=>(
-          <button key={p} className={`nav-item${page===p?" active":""}`} onClick={()=>setPage(p)}>
-            <span className="nav-icon">{icon}</span>{label}
-          </button>
-        ))}
-      </nav>
-      <div style={{padding:"12px 8px"}}>
-        <button className="nav-item" onClick={onLogout}><span className="nav-icon">🚪</span>Déconnexion</button>
-      </div>
-      <div style={{padding:"8px 20px 16px",fontSize:"11px",color:"#475569"}}>v1.0.0 — One System © 2025</div>
-    </aside>
-  );
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function openModal(title,html){
+  document.getElementById("modal-title").textContent=title;
+  document.getElementById("modal-body").innerHTML=html;
+  document.getElementById("modal-overlay").classList.remove("hidden");
 }
+function closeModal(){ document.getElementById("modal-overlay").classList.add("hidden"); }
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
-function Dashboard(){
-  const top=[
-    {id:2,prenom:"Thomas",nom:"Durand",ca_total:142500,nb_affaires:3},
-    {id:1,prenom:"Sophie",nom:"Martin",ca_total:87000,nb_affaires:2},
-    {id:5,prenom:"Camille",nom:"Petit",ca_total:63000,nb_affaires:1},
-    {id:3,prenom:"Marie",nom:"Leblanc",ca_total:35000,nb_affaires:0},
-    {id:4,prenom:"Nicolas",nom:"Bernard",ca_total:18000,nb_affaires:1},
-  ];
-  const medals=["🥇","🥈","🥉"];
-  return(
-    <>
-      <div className="page-header">
-        <div><div className="page-title">Tableau de bord</div><div className="page-subtitle">Vue d'ensemble de l'activité des apporteurs</div></div>
-      </div>
-      <div className="stat-grid">
-        <div className="stat-card"><div className="stat-icon blue">👥</div><div><div className="stat-label">Apporteurs actifs</div><div className="stat-value">4</div></div></div>
-        <div className="stat-card"><div className="stat-icon amber">🎯</div><div><div className="stat-label">Opportunités en cours</div><div className="stat-value">3</div></div></div>
-        <div className="stat-card"><div className="stat-icon green">📈</div><div><div className="stat-label">CA gagné</div><div className="stat-value">{fmt(254500)}</div></div></div>
-        <div className="stat-card"><div className="stat-icon red">💰</div><div><div className="stat-label">Commissions dues</div><div className="stat-value">{fmt(17370)}</div></div></div>
-      </div>
-      <div className="card">
-        <div className="card-header">🏆 Top 5 apporteurs (CA gagné)</div>
-        <div className="table-wrap">
-          <table><thead><tr><th>#</th><th>Apporteur</th><th>Affaires gagnées</th><th>CA total</th></tr></thead>
-          <tbody>
-            {top.map((a,i)=>(
-              <tr key={a.id}>
-                <td><span style={{fontWeight:700,color:i===0?"#f59e0b":"inherit"}}>{medals[i]||`${i+1}.`}</span></td>
-                <td className="fw-600">{a.prenom} {a.nom}</td>
-                <td>{a.nb_affaires}</td>
-                <td className="fw-600" style={{color:"var(--success)"}}>{fmt(a.ca_total)}</td>
-              </tr>
-            ))}
-          </tbody></table>
-        </div>
-      </div>
-    </>
-  );
+function renderDashboard(){
+  const top = [...APPORTEURS].filter(a=>a.ca>0).sort((a,b)=>b.ca-a.ca).slice(0,5);
+  const medals = ["🥇","🥈","🥉"];
+  document.getElementById("page-dashboard").innerHTML = `
+    <div class="ph">
+      <div><div class="ptitle">Tableau de bord</div><div class="psub">Vue d'ensemble de l'activité des apporteurs</div></div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat"><div class="stat-ic ic-blue">👥</div><div><div class="stat-lbl">Apporteurs actifs</div><div class="stat-val">4</div></div></div>
+      <div class="stat"><div class="stat-ic ic-amber">🎯</div><div><div class="stat-lbl">Opportunités en cours</div><div class="stat-val">3</div></div></div>
+      <div class="stat"><div class="stat-ic ic-green">📈</div><div><div class="stat-lbl">CA gagné</div><div class="stat-val">${€(254500)}</div></div></div>
+      <div class="stat"><div class="stat-ic ic-red">💰</div><div><div class="stat-lbl">Commissions dues</div><div class="stat-val">${€(17370)}</div></div></div>
+    </div>
+    <div class="card">
+      <div class="card-hd">🏆 Top 5 apporteurs (CA gagné)</div>
+      <div class="tw"><table>
+        <thead><tr><th>#</th><th>Apporteur</th><th>CA généré</th><th>Opportunités</th></tr></thead>
+        <tbody>${top.map((a,i)=>`<tr>
+          <td style="font-weight:700;color:${i===0?'#f59e0b':'inherit'}">${medals[i]||i+1+'.'}</td>
+          <td class="fw">${a.prenom} ${a.nom}</td>
+          <td class="fw" style="color:var(--success)">${€(a.ca)}</td>
+          <td>${a.nbopp}</td>
+        </tr>`).join("")}</tbody>
+      </table></div>
+    </div>`;
 }
 
 // ── Apporteurs ────────────────────────────────────────────────────────────────
-function ApporteurModal({apporteur,onClose}){
-  const isEdit=Boolean(apporteur?.id);
-  const[form,setForm]=useState(isEdit?{...apporteur}:{nom:"",prenom:"",email:"",telephone:"",societe:"",taux_commission:10,actif:true});
-  const set=(k,v)=>setForm(f=>({...f,[k]:v}));
-  return(
-    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div className="modal">
-        <div className="modal-header"><div className="modal-title">{isEdit?"Modifier l'apporteur":"Nouvel apporteur"}</div><button className="btn btn-ghost btn-sm" onClick={onClose}>✕</button></div>
-        <div className="modal-body">
-          <div className="form-grid">
-            <div className="form-group"><label className="form-label">Prénom <span>*</span></label><input className="form-control" value={form.prenom} onChange={e=>set("prenom",e.target.value)}/></div>
-            <div className="form-group"><label className="form-label">Nom <span>*</span></label><input className="form-control" value={form.nom} onChange={e=>set("nom",e.target.value)}/></div>
-          </div>
-          <div className="form-group"><label className="form-label">Email <span>*</span></label><input className="form-control" type="email" value={form.email} onChange={e=>set("email",e.target.value)}/></div>
-          <div className="form-grid">
-            <div className="form-group"><label className="form-label">Téléphone</label><input className="form-control" value={form.telephone||""} onChange={e=>set("telephone",e.target.value)}/></div>
-            <div className="form-group"><label className="form-label">Société</label><input className="form-control" value={form.societe||""} onChange={e=>set("societe",e.target.value)}/></div>
-          </div>
-          <div className="form-group"><label className="form-label">Taux de commission (%) <span>*</span></label><input className="form-control" type="number" min="0" max="100" step="0.5" value={form.taux_commission} onChange={e=>set("taux_commission",parseFloat(e.target.value))}/></div>
-          {isEdit&&<div className="form-group"><label style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer"}}><input type="checkbox" checked={form.actif} onChange={e=>set("actif",e.target.checked)}/> Apporteur actif</label></div>}
-          <div className="form-actions"><button className="btn btn-secondary" onClick={onClose}>Annuler</button><button className="btn btn-primary" onClick={onClose}>Enregistrer</button></div>
-        </div>
+let appSearch="";
+function renderApporteurs(){
+  const q=appSearch.toLowerCase();
+  const list=APPORTEURS.filter(a=>`${a.prenom} ${a.nom} ${a.email} ${a.societe}`.toLowerCase().includes(q));
+  document.getElementById("page-apporteurs").innerHTML=`
+    <div class="ph">
+      <div><div class="ptitle">Apporteurs d'affaires</div><div class="psub">${APPORTEURS.length} apporteurs enregistrés</div></div>
+      <div class="row">
+        <div class="search"><span>🔍</span><input id="app-search" placeholder="Rechercher…" value="${appSearch}" oninput="appSearch=this.value;renderApporteurs()" /></div>
+        <button class="btn btn-p" onclick="openApporteurModal(null)">+ Nouvel apporteur</button>
       </div>
     </div>
-  );
+    <div class="card"><div class="tw"><table>
+      <thead><tr><th>Nom</th><th>Société</th><th>Contact</th><th>Commission</th><th>CA généré</th><th>Opp.</th><th>Statut</th><th></th></tr></thead>
+      <tbody>${list.map(a=>`<tr>
+        <td><div class="fw">${a.prenom} ${a.nom}</div></td>
+        <td class="tm">${a.societe||"—"}</td>
+        <td><div>${a.email}</div>${a.tel?`<div class="tm tsm">${a.tel}</div>`:""}</td>
+        <td class="fw">${a.taux}%</td>
+        <td class="fw" style="color:var(--success)">${€(a.ca)}</td>
+        <td>${a.nbopp}</td>
+        <td><span class="badge ${a.actif?"b-actif":"b-inactif"}">${a.actif?"Actif":"Inactif"}</span></td>
+        <td><div class="row"><button class="btn btn-s sm" onclick="openApporteurModal(${a.id})">Modifier</button><button class="btn btn-d sm">Suppr.</button></div></td>
+      </tr>`).join("")}</tbody>
+    </table></div></div>`;
 }
 
-function Apporteurs(){
-  const[search,setSearch]=useState("");
-  const[modal,setModal]=useState(null);
-  const filtered=APPORTEURS.filter(a=>`${a.prenom} ${a.nom} ${a.email} ${a.societe||""}`.toLowerCase().includes(search.toLowerCase()));
-  return(
-    <>
-      {modal!==null&&<ApporteurModal apporteur={modal==="new"?null:modal} onClose={()=>setModal(null)}/>}
-      <div className="page-header">
-        <div><div className="page-title">Apporteurs d'affaires</div><div className="page-subtitle">{APPORTEURS.length} apporteurs enregistrés</div></div>
-        <div className="flex items-center gap-2">
-          <div className="search-bar"><span>🔍</span><input placeholder="Rechercher…" value={search} onChange={e=>setSearch(e.target.value)}/></div>
-          <button className="btn btn-primary" onClick={()=>setModal("new")}>+ Nouvel apporteur</button>
-        </div>
-      </div>
-      <div className="card"><div className="table-wrap">
-        <table><thead><tr><th>Nom</th><th>Société</th><th>Contact</th><th>Commission</th><th>CA généré</th><th>Opportunités</th><th>Statut</th><th></th></tr></thead>
-        <tbody>
-          {filtered.map(a=>(
-            <tr key={a.id}>
-              <td><div className="fw-600">{a.prenom} {a.nom}</div></td>
-              <td className="text-muted">{a.societe||"—"}</td>
-              <td><div>{a.email}</div>{a.telephone&&<div className="text-muted text-sm">{a.telephone}</div>}</td>
-              <td className="fw-600">{a.taux_commission}%</td>
-              <td className="fw-600" style={{color:"var(--success)"}}>{fmt(a.ca_total)}</td>
-              <td>{a.nombre_opportunites}</td>
-              <td><span className={`badge badge-${a.actif?"gagne":"perdu"}`}>{a.actif?"Actif":"Inactif"}</span></td>
-              <td><div className="flex gap-2"><button className="btn btn-secondary btn-sm" onClick={()=>setModal(a)}>Modifier</button><button className="btn btn-danger btn-sm">Suppr.</button></div></td>
-            </tr>
-          ))}
-        </tbody></table>
-      </div></div>
-    </>
-  );
+function openApporteurModal(id){
+  const a = id ? APPORTEURS.find(x=>x.id===id) : null;
+  const title = a ? "Modifier l'apporteur" : "Nouvel apporteur";
+  openModal(title,`
+    <div class="fg2">
+      <div class="fg"><label class="fl">Prénom <span>*</span></label><input class="fc" id="m-prenom" value="${a?.prenom||""}"/></div>
+      <div class="fg"><label class="fl">Nom <span>*</span></label><input class="fc" id="m-nom" value="${a?.nom||""}"/></div>
+    </div>
+    <div class="fg"><label class="fl">Email <span>*</span></label><input class="fc" type="email" id="m-email" value="${a?.email||""}"/></div>
+    <div class="fg2">
+      <div class="fg"><label class="fl">Téléphone</label><input class="fc" id="m-tel" value="${a?.tel||""}"/></div>
+      <div class="fg"><label class="fl">Société</label><input class="fc" id="m-soc" value="${a?.societe||""}"/></div>
+    </div>
+    <div class="fg"><label class="fl">Taux de commission (%) <span>*</span></label><input class="fc" type="number" min="0" max="100" step="0.5" id="m-taux" value="${a?.taux||10}"/></div>
+    ${a?`<div class="fg"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="m-actif" ${a.actif?"checked":""}/> Apporteur actif</label></div>`:""}
+    <div class="fa">
+      <button class="btn btn-s" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-p" onclick="closeModal();renderApporteurs()">Enregistrer</button>
+    </div>`);
 }
 
 // ── Opportunités ──────────────────────────────────────────────────────────────
-function OppModal({opp,onClose}){
-  const isEdit=Boolean(opp?.id);
-  const[form,setForm]=useState(isEdit?{...opp}:{apporteur_id:1,nom_prospect:"",societe_prospect:"",montant_estime:0,statut:"nouveau",description:""});
-  const set=(k,v)=>setForm(f=>({...f,[k]:v}));
-  return(
-    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div className="modal">
-        <div className="modal-header"><div className="modal-title">{isEdit?"Modifier l'opportunité":"Nouvelle opportunité"}</div><button className="btn btn-ghost btn-sm" onClick={onClose}>✕</button></div>
-        <div className="modal-body">
-          <div className="form-group"><label className="form-label">Apporteur <span>*</span></label>
-            <select className="form-control" value={form.apporteur_id} onChange={e=>set("apporteur_id",Number(e.target.value))}>
-              {APPORTEURS.map(a=><option key={a.id} value={a.id}>{a.prenom} {a.nom}</option>)}
-            </select>
-          </div>
-          <div className="form-grid">
-            <div className="form-group"><label className="form-label">Nom du prospect <span>*</span></label><input className="form-control" value={form.nom_prospect} onChange={e=>set("nom_prospect",e.target.value)}/></div>
-            <div className="form-group"><label className="form-label">Société</label><input className="form-control" value={form.societe_prospect||""} onChange={e=>set("societe_prospect",e.target.value)}/></div>
-          </div>
-          <div className="form-grid">
-            <div className="form-group"><label className="form-label">Montant estimé (€)</label><input className="form-control" type="number" min="0" value={form.montant_estime} onChange={e=>set("montant_estime",Number(e.target.value))}/></div>
-            <div className="form-group"><label className="form-label">Statut</label>
-              <select className="form-control" value={form.statut} onChange={e=>set("statut",e.target.value)}>
-                <option value="nouveau">Nouveau</option><option value="en_cours">En cours</option><option value="gagne">Gagné</option><option value="perdu">Perdu</option>
-              </select>
-            </div>
-          </div>
-          <div className="form-group"><label className="form-label">Description</label><textarea className="form-control" value={form.description||""} onChange={e=>set("description",e.target.value)} style={{minHeight:70}}/></div>
-          {form.statut==="gagne"&&<div className="alert alert-info" style={{marginBottom:0}}>✅ Une commission sera calculée automatiquement à la sauvegarde.</div>}
-          <div className="form-actions"><button className="btn btn-secondary" onClick={onClose}>Annuler</button><button className="btn btn-primary" onClick={onClose}>Enregistrer</button></div>
-        </div>
+let oppSearch="",oppFilter="";
+function renderOpportunites(){
+  const q=oppSearch.toLowerCase();
+  const list=OPPORTUNITES.filter(o=>
+    `${o.prospect} ${o.societe} ${o.apporteur}`.toLowerCase().includes(q)&&
+    (!oppFilter||o.statut===oppFilter)
+  );
+  document.getElementById("page-opportunites").innerHTML=`
+    <div class="ph">
+      <div><div class="ptitle">Opportunités</div><div class="psub">${OPPORTUNITES.length} opportunités</div></div>
+      <div class="row">
+        <div class="search"><span>🔍</span><input placeholder="Rechercher…" value="${oppSearch}" oninput="oppSearch=this.value;renderOpportunites()"/></div>
+        <select class="fc" style="width:auto" onchange="oppFilter=this.value;renderOpportunites()">
+          <option value="" ${!oppFilter?"selected":""}>Tous les statuts</option>
+          <option value="nouveau" ${oppFilter==="nouveau"?"selected":""}>Nouveau</option>
+          <option value="en_cours" ${oppFilter==="en_cours"?"selected":""}>En cours</option>
+          <option value="gagne" ${oppFilter==="gagne"?"selected":""}>Gagné</option>
+          <option value="perdu" ${oppFilter==="perdu"?"selected":""}>Perdu</option>
+        </select>
+        <button class="btn btn-p" onclick="openOppModal(null)">+ Nouvelle opportunité</button>
       </div>
     </div>
-  );
+    <div class="card"><div class="tw"><table>
+      <thead><tr><th>Prospect</th><th>Apporteur</th><th>Montant estimé</th><th>Statut</th><th>Création</th><th>Clôture</th><th></th></tr></thead>
+      <tbody>${list.map(o=>`<tr>
+        <td><div class="fw">${o.prospect}</div>${o.societe?`<div class="tm tsm">${o.societe}</div>`:""}</td>
+        <td>${o.apporteur}</td>
+        <td class="fw">${€(o.montant)}</td>
+        <td><span class="badge ${SCLS[o.statut]}">${SLABELS[o.statut]}</span></td>
+        <td class="tm">${o.creation}</td>
+        <td class="tm">${o.cloture}</td>
+        <td><div class="row"><button class="btn btn-s sm" onclick="openOppModal(${o.id})">Modifier</button><button class="btn btn-d sm">Suppr.</button></div></td>
+      </tr>`).join("")}</tbody>
+    </table></div></div>`;
 }
 
-function Opportunites(){
-  const[search,setSearch]=useState("");
-  const[filterStatut,setFilterStatut]=useState("");
-  const[modal,setModal]=useState(null);
-  const filtered=OPPORTUNITES.filter(o=>{
-    const q=search.toLowerCase();
-    return `${o.nom_prospect} ${o.societe_prospect||""} ${o.apporteur_nom} ${o.apporteur_prenom}`.toLowerCase().includes(q)&&(!filterStatut||o.statut===filterStatut);
-  });
-  return(
-    <>
-      {modal!==null&&<OppModal opp={modal==="new"?null:modal} onClose={()=>setModal(null)}/>}
-      <div className="page-header">
-        <div><div className="page-title">Opportunités</div><div className="page-subtitle">{OPPORTUNITES.length} opportunités</div></div>
-        <div className="flex items-center gap-2">
-          <div className="search-bar"><span>🔍</span><input placeholder="Rechercher…" value={search} onChange={e=>setSearch(e.target.value)}/></div>
-          <select className="form-control" style={{width:"auto"}} value={filterStatut} onChange={e=>setFilterStatut(e.target.value)}>
-            <option value="">Tous les statuts</option><option value="nouveau">Nouveau</option><option value="en_cours">En cours</option><option value="gagne">Gagné</option><option value="perdu">Perdu</option>
-          </select>
-          <button className="btn btn-primary" onClick={()=>setModal("new")}>+ Nouvelle opportunité</button>
-        </div>
+function openOppModal(id){
+  const o = id ? OPPORTUNITES.find(x=>x.id===id) : null;
+  openModal(o?"Modifier l'opportunité":"Nouvelle opportunité",`
+    <div class="fg"><label class="fl">Apporteur <span>*</span></label>
+      <select class="fc">${APPORTEURS.map(a=>`<option ${o&&o.apporteur===a.prenom+" "+a.nom?"selected":""}>${a.prenom} ${a.nom}</option>`).join("")}</select>
+    </div>
+    <div class="fg2">
+      <div class="fg"><label class="fl">Nom du prospect <span>*</span></label><input class="fc" value="${o?.prospect||""}"/></div>
+      <div class="fg"><label class="fl">Société</label><input class="fc" value="${o?.societe||""}"/></div>
+    </div>
+    <div class="fg2">
+      <div class="fg"><label class="fl">Montant estimé (€)</label><input class="fc" type="number" min="0" value="${o?.montant||0}"/></div>
+      <div class="fg"><label class="fl">Statut</label>
+        <select class="fc">
+          <option value="nouveau" ${o?.statut==="nouveau"?"selected":""}>Nouveau</option>
+          <option value="en_cours" ${o?.statut==="en_cours"?"selected":""}>En cours</option>
+          <option value="gagne" ${o?.statut==="gagne"?"selected":""}>Gagné</option>
+          <option value="perdu" ${o?.statut==="perdu"?"selected":""}>Perdu</option>
+        </select>
       </div>
-      <div className="card"><div className="table-wrap">
-        <table><thead><tr><th>Prospect</th><th>Apporteur</th><th>Montant estimé</th><th>Statut</th><th>Création</th><th>Clôture</th><th></th></tr></thead>
-        <tbody>
-          {filtered.map(o=>(
-            <tr key={o.id}>
-              <td><div className="fw-600">{o.nom_prospect}</div>{o.societe_prospect&&<div className="text-muted text-sm">{o.societe_prospect}</div>}</td>
-              <td>{o.apporteur_prenom} {o.apporteur_nom}</td>
-              <td className="fw-600">{fmt(o.montant_estime)}</td>
-              <td><Badge statut={o.statut}/></td>
-              <td className="text-muted">{fmtDate(o.date_creation)}</td>
-              <td className="text-muted">{fmtDate(o.date_cloture)}</td>
-              <td><div className="flex gap-2"><button className="btn btn-secondary btn-sm" onClick={()=>setModal(o)}>Modifier</button><button className="btn btn-danger btn-sm">Suppr.</button></div></td>
-            </tr>
-          ))}
-        </tbody></table>
-      </div></div>
-    </>
-  );
+    </div>
+    <div class="fg"><label class="fl">Description / Notes</label><textarea class="fc" style="min-height:70px"></textarea></div>
+    <div class="alert a-info" style="margin-bottom:0">✅ Une commission est calculée automatiquement quand le statut passe à <strong>Gagné</strong>.</div>
+    <div class="fa"><button class="btn btn-s" onclick="closeModal()">Annuler</button><button class="btn btn-p" onclick="closeModal()">Enregistrer</button></div>`);
 }
 
 // ── Commissions ───────────────────────────────────────────────────────────────
-function Commissions(){
-  const[filter,setFilter]=useState("");
-  const[data,setData]=useState(COMMISSIONS);
-  const filtered=filter?data.filter(c=>c.statut_paiement===filter):data;
-  const dues=data.filter(c=>c.statut_paiement==="en_attente").reduce((s,c)=>s+c.montant,0);
-  const paye=data.filter(c=>c.statut_paiement==="paye").reduce((s,c)=>s+c.montant,0);
-  const pay=id=>setData(d=>d.map(c=>c.id===id?{...c,statut_paiement:"paye",date_paiement:new Date().toISOString().slice(0,10)}:c));
-  return(
-    <>
-      <div className="page-header">
-        <div><div className="page-title">Commissions</div><div className="page-subtitle">Suivi des commissions dues aux apporteurs</div></div>
-        <div className="flex items-center gap-2">
-          <select className="form-control" style={{width:"auto"}} value={filter} onChange={e=>setFilter(e.target.value)}>
-            <option value="">Toutes</option><option value="en_attente">En attente</option><option value="paye">Payées</option>
-          </select>
-        </div>
+let comFilter="";
+function renderCommissions(){
+  const list = comFilter ? COMMISSIONS.filter(c=>c.statut===comFilter) : COMMISSIONS;
+  const dues = COMMISSIONS.filter(c=>c.statut==="attente").reduce((s,c)=>s+c.montant,0);
+  const paye = COMMISSIONS.filter(c=>c.statut==="paye").reduce((s,c)=>s+c.montant,0);
+  document.getElementById("page-commissions").innerHTML=`
+    <div class="ph">
+      <div><div class="ptitle">Commissions</div><div class="psub">Suivi des commissions dues aux apporteurs</div></div>
+      <div class="row">
+        <select class="fc" style="width:auto" onchange="comFilter=this.value;renderCommissions()">
+          <option value="" ${!comFilter?"selected":""}>Toutes</option>
+          <option value="attente" ${comFilter==="attente"?"selected":""}>En attente</option>
+          <option value="paye" ${comFilter==="paye"?"selected":""}>Payées</option>
+        </select>
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:24}}>
-        <div className="stat-card"><div className="stat-icon amber">💳</div><div><div className="stat-label">Commissions dues</div><div className="stat-value" style={{color:"var(--warning)"}}>{fmt(dues)}</div></div></div>
-        <div className="stat-card"><div className="stat-icon green">✅</div><div><div className="stat-label">Commissions payées</div><div className="stat-value" style={{color:"var(--success)"}}>{fmt(paye)}</div></div></div>
-      </div>
-      <div className="card"><div className="table-wrap">
-        <table><thead><tr><th>Apporteur</th><th>Prospect</th><th>Montant affaire</th><th>Commission</th><th>Statut</th><th>Calculée le</th><th>Payée le</th><th></th></tr></thead>
-        <tbody>
-          {filtered.map(c=>(
-            <tr key={c.id}>
-              <td className="fw-600">{c.apporteur_prenom} {c.apporteur_nom}</td>
-              <td><div>{c.prospect_nom}</div>{c.prospect_societe&&<div className="text-muted text-sm">{c.prospect_societe}</div>}</td>
-              <td>{fmt(c.montant_affaire)}</td>
-              <td className="fw-600" style={{color:"var(--primary)"}}>{fmt(c.montant)}</td>
-              <td><span className={`badge badge-${c.statut_paiement}`}>{c.statut_paiement==="paye"?"Payée":"En attente"}</span></td>
-              <td className="text-muted">{fmtDate(c.date_calcul)}</td>
-              <td className="text-muted">{fmtDate(c.date_paiement)}</td>
-              <td>{c.statut_paiement==="en_attente"&&<button className="btn btn-success btn-sm" onClick={()=>pay(c.id)}>Marquer payée</button>}</td>
-            </tr>
-          ))}
-        </tbody></table>
-      </div></div>
-    </>
-  );
-}
-
-// ── App ───────────────────────────────────────────────────────────────────────
-function App(){
-  const[auth,setAuth]=useState(false);
-  const[page,setPage]=useState("dashboard");
-  if(!auth) return <Login onLogin={()=>setAuth(true)}/>;
-  const PAGES={dashboard:<Dashboard/>,apporteurs:<Apporteurs/>,opportunites:<Opportunites/>,commissions:<Commissions/>};
-  return(
-    <div className="layout">
-      <Sidebar page={page} setPage={setPage} onLogout={()=>setAuth(false)}/>
-      <main className="main-content"><div className="page">{PAGES[page]}</div></main>
     </div>
-  );
+    <div class="stat2">
+      <div class="stat"><div class="stat-ic ic-amber">💳</div><div><div class="stat-lbl">Commissions dues</div><div class="stat-val" style="color:var(--warning)">${€(dues)}</div></div></div>
+      <div class="stat"><div class="stat-ic ic-green">✅</div><div><div class="stat-lbl">Commissions payées</div><div class="stat-val" style="color:var(--success)">${€(paye)}</div></div></div>
+    </div>
+    <div class="card"><div class="tw"><table>
+      <thead><tr><th>Apporteur</th><th>Prospect</th><th>Montant affaire</th><th>Commission</th><th>Statut</th><th>Calculée le</th><th>Payée le</th><th></th></tr></thead>
+      <tbody>${list.map(c=>`<tr>
+        <td class="fw">${c.apporteur}</td>
+        <td><div>${c.prospect}</div>${c.societe?`<div class="tm tsm">${c.societe}</div>`:""}</td>
+        <td>${€(c.affaire)}</td>
+        <td class="fw" style="color:var(--primary)">${€(c.montant)}</td>
+        <td><span class="badge ${c.statut==="paye"?"b-paye":"b-attente"}">${c.statut==="paye"?"Payée":"En attente"}</span></td>
+        <td class="tm">${c.calcule}</td>
+        <td class="tm">${c.paye}</td>
+        <td>${c.statut==="attente"?`<button class="btn btn-ok sm" onclick="payerCommission(${c.id})">Marquer payée</button>`:""}</td>
+      </tr>`).join("")}</tbody>
+    </table></div></div>`;
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+function payerCommission(id){
+  const c = COMMISSIONS.find(x=>x.id===id);
+  if(c){ c.statut="paye"; c.paye=new Date().toLocaleDateString("fr-FR"); }
+  renderCommissions();
+  renderDashboard();
+}
 </script>
 </body>
 </html>
