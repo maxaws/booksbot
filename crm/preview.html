@@ -123,28 +123,8 @@ td{padding:12px 16px;vertical-align:middle}
 
 <div class="demo-tag">APERÇU — données fictives</div>
 
-<!-- LOGIN -->
-<div id="login-screen" class="login-wrap">
-  <div class="login-box">
-    <div class="login-logo">
-      <div class="icon">💼</div>
-      <div class="name">One System CRM</div>
-      <div class="sub">Connectez-vous pour accéder au CRM</div>
-    </div>
-    <div class="card">
-      <div style="padding:20px">
-        <div class="alert a-info">🔑 Identifiants démo : <strong>admin</strong> / <strong>demo</strong></div>
-        <div id="login-err" class="alert a-err hidden"></div>
-        <div class="fg"><label class="fl">Identifiant</label><input class="fc" id="inp-user" placeholder="admin" autocomplete="username"/></div>
-        <div class="fg"><label class="fl">Mot de passe</label><input class="fc" id="inp-pass" type="password" placeholder="••••" autocomplete="current-password"/></div>
-        <button class="btn btn-p" style="width:100%;justify-content:center;margin-top:4px" onclick="doLogin()">Se connecter</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- APP -->
-<div id="app" class="hidden">
+<div id="app">
   <aside class="sidebar">
     <div class="logo"><div class="brand">One System</div><div class="sub">CRM Apporteurs d'affaires</div></div>
     <nav>
@@ -153,9 +133,7 @@ td{padding:12px 16px;vertical-align:middle}
       <button class="nav-btn"        data-page="opportunites" onclick="go('opportunites')"><span class="nav-icon">🎯</span>Opportunités</button>
       <button class="nav-btn"        data-page="commissions" onclick="go('commissions')"><span class="nav-icon">💰</span>Commissions</button>
     </nav>
-    <div class="sidebar-foot">
-      <button class="nav-btn" onclick="logout()"><span class="nav-icon">🚪</span>Déconnexion</button>
-    </div>
+    <div class="sidebar-foot"></div>
     <div style="padding:8px 20px 16px;font-size:11px;color:#475569">v1.0.0 — One System © 2025</div>
   </aside>
   <main class="main">
@@ -206,30 +184,8 @@ const SLABELS = {nouveau:"Nouveau",en_cours:"En cours",gagne:"Gagné",perdu:"Per
 const SCLS    = {nouveau:"b-nouveau",en_cours:"b-en_cours",gagne:"b-gagne",perdu:"b-perdu"};
 const badge = (s,lbl,cls) => `<span class="badge ${cls}">${lbl}</span>`;
 
-// ── Auth ──────────────────────────────────────────────────────────────────────
-function doLogin(){
-  const u=document.getElementById("inp-user").value;
-  const p=document.getElementById("inp-pass").value;
-  const err=document.getElementById("login-err");
-  if(u==="admin"&&p==="demo"){
-    document.getElementById("login-screen").classList.add("hidden");
-    document.getElementById("app").classList.remove("hidden");
-    renderDashboard(); renderApporteurs(); renderOpportunites(); renderCommissions();
-  } else {
-    err.textContent="Identifiants incorrects — essayez admin / demo";
-    err.classList.remove("hidden");
-  }
-}
-document.getElementById("inp-pass").addEventListener("keydown",e=>{ if(e.key==="Enter") doLogin(); });
-document.getElementById("inp-user").addEventListener("keydown",e=>{ if(e.key==="Enter") doLogin(); });
-
-function logout(){
-  document.getElementById("app").classList.add("hidden");
-  document.getElementById("login-screen").classList.remove("hidden");
-  document.getElementById("inp-user").value="";
-  document.getElementById("inp-pass").value="";
-  document.getElementById("login-err").classList.add("hidden");
-}
+// Init
+renderDashboard(); renderApporteurs(); renderOpportunites(); renderCommissions();
 
 // ── Navigation ────────────────────────────────────────────────────────────────
 let curPage="dashboard";
