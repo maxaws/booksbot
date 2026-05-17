@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from auth import get_current_user
 from database import get_db
 from models import Apporteur, Commission, Opportunite
 from schemas import DashboardStats, TopApporteur
@@ -10,7 +11,10 @@ router = APIRouter()
 
 
 @router.get("/", response_model=DashboardStats)
-def get_stats(db: Session = Depends(get_db)):
+def get_stats(
+    db: Session = Depends(get_db),
+    _user: str = Depends(get_current_user),
+):
     total_apporteurs = (
         db.query(func.count(Apporteur.id)).filter(Apporteur.actif == True).scalar() or 0
     )
@@ -49,21 +53,19 @@ def get_stats(db: Session = Depends(get_db)):
         .all()
     )
 
-    top_apporteurs = [
-        TopApporteur(
-            id=row.id,
-            nom=row.nom,
-            prenom=row.prenom,
-            ca_total=row.ca_total or 0.0,
-            nb_affaires=row.nb_affaires or 0,
-        )
-        for row in top_raw
-    ]
-
     return DashboardStats(
         total_apporteurs=total_apporteurs,
         opportunites_en_cours=opportunites_en_cours,
         ca_gagne=ca_gagne,
         commissions_dues=commissions_dues,
-        top_apporteurs=top_apporteurs,
+        top_apporteurs=[
+            TopApporteur(
+                id=row.id,
+                nom=row.nom,
+                prenom=row.prenom,
+                ca_total=row.ca_total or 0.0,
+                nb_affaires=row.nb_affaires or 0,
+            )
+            for row in top_raw
+        ],
     )

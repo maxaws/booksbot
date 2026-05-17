@@ -1,12 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy import func
 from sqlalchemy.orm import Session
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
+from auth import get_current_user
 from database import get_db
-from models import Apporteur, Commission, Opportunite
+from models import Apporteur, Opportunite
 from schemas import ApporteurCreate, ApporteurDetail, ApporteurOut, ApporteurUpdate
 
 router = APIRouter()
+_limiter = Limiter(key_func=get_remote_address)
 
 
 def _enrich(apporteur: Apporteur, db: Session) -> ApporteurDetail:
@@ -25,13 +29,26 @@ def _enrich(apporteur: Apporteur, db: Session) -> ApporteurDetail:
 
 
 @router.get("/", response_model=list[ApporteurDetail])
-def list_apporteurs(db: Session = Depends(get_db)):
-    apporteurs = db.query(Apporteur).order_by(Apporteur.nom).all()
+def list_apporteurs(
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=500),
+    db: Session = Depends(get_db),
+    _user: str = Depends(get_current_user),
+):
+    apporteurs = (
+        db.query(Apporteur).order_by(Apporteur.nom).offset(skip).limit(limit).all()
+    )
     return [_enrich(a, db) for a in apporteurs]
 
 
 @router.post("/", response_model=ApporteurOut, status_code=201)
-def create_apporteur(payload: ApporteurCreate, db: Session = Depends(get_db)):
+@_limiter.limit("30/minute")
+def create_apporteur(
+    request: Request,
+    payload: ApporteurCreate,
+    db: Session = Depends(get_db),
+    _user: str = Depends(get_current_user),
+):
     if db.query(Apporteur).filter(Apporteur.email == payload.email).first():
         raise HTTPException(status_code=400, detail="Email déjà utilisé")
     apporteur = Apporteur(**payload.model_dump())
@@ -42,7 +59,11 @@ def create_apporteur(payload: ApporteurCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/{apporteur_id}", response_model=ApporteurDetail)
-def get_apporteur(apporteur_id: int, db: Session = Depends(get_db)):
+def get_apporteur(
+    apporteur_id: int,
+    db: Session = Depends(get_db),
+    _user: str = Depends(get_current_user),
+):
     apporteur = db.query(Apporteur).filter(Apporteur.id == apporteur_id).first()
     if not apporteur:
         raise HTTPException(status_code=404, detail="Apporteur introuvable")
@@ -51,7 +72,10 @@ def get_apporteur(apporteur_id: int, db: Session = Depends(get_db)):
 
 @router.put("/{apporteur_id}", response_model=ApporteurOut)
 def update_apporteur(
-    apporteur_id: int, payload: ApporteurUpdate, db: Session = Depends(get_db)
+    apporteur_id: int,
+    payload: ApporteurUpdate,
+    db: Session = Depends(get_db),
+    _user: str = Depends(get_current_user),
 ):
     apporteur = db.query(Apporteur).filter(Apporteur.id == apporteur_id).first()
     if not apporteur:
@@ -64,7 +88,11 @@ def update_apporteur(
 
 
 @router.delete("/{apporteur_id}", status_code=204)
-def delete_apporteur(apporteur_id: int, db: Session = Depends(get_db)):
+def delete_apporteur(
+    apporteur_id: int,
+    db: Session = Depends(get_db),
+    _user: str = Depends(get_current_user),
+):
     apporteur = db.query(Apporteur).filter(Apporteur.id == apporteur_id).first()
     if not apporteur:
         raise HTTPException(status_code=404, detail="Apporteur introuvable")

@@ -10,11 +10,11 @@ class Apporteur(Base):
     __tablename__ = "apporteurs"
 
     id = Column(Integer, primary_key=True, index=True)
-    nom = Column(String, nullable=False)
-    prenom = Column(String, nullable=False)
-    email = Column(String, unique=True, index=True, nullable=False)
-    telephone = Column(String, nullable=True)
-    societe = Column(String, nullable=True)
+    nom = Column(String(100), nullable=False)
+    prenom = Column(String(100), nullable=False)
+    email = Column(String(254), unique=True, index=True, nullable=False)
+    telephone = Column(String(30), nullable=True)
+    societe = Column(String(200), nullable=True)
     taux_commission = Column(Float, default=10.0)
     actif = Column(Boolean, default=True)
     date_creation = Column(DateTime, default=datetime.utcnow)
@@ -27,13 +27,13 @@ class Opportunite(Base):
     __tablename__ = "opportunites"
 
     id = Column(Integer, primary_key=True, index=True)
-    apporteur_id = Column(Integer, ForeignKey("apporteurs.id"), nullable=False)
-    nom_prospect = Column(String, nullable=False)
-    societe_prospect = Column(String, nullable=True)
+    apporteur_id = Column(Integer, ForeignKey("apporteurs.id", ondelete="RESTRICT"), nullable=False)
+    nom_prospect = Column(String(200), nullable=False)
+    societe_prospect = Column(String(200), nullable=True)
     montant_estime = Column(Float, default=0.0)
     # nouveau | en_cours | gagne | perdu
-    statut = Column(String, default="nouveau", nullable=False)
-    description = Column(String, nullable=True)
+    statut = Column(String(20), default="nouveau", nullable=False)
+    description = Column(String(2000), nullable=True)
     date_creation = Column(DateTime, default=datetime.utcnow)
     date_cloture = Column(DateTime, nullable=True)
 
@@ -45,11 +45,11 @@ class Commission(Base):
     __tablename__ = "commissions"
 
     id = Column(Integer, primary_key=True, index=True)
-    opportunite_id = Column(Integer, ForeignKey("opportunites.id"), nullable=False, unique=True)
-    apporteur_id = Column(Integer, ForeignKey("apporteurs.id"), nullable=False)
+    opportunite_id = Column(Integer, ForeignKey("opportunites.id", ondelete="RESTRICT"), nullable=False, unique=True)
+    apporteur_id = Column(Integer, ForeignKey("apporteurs.id", ondelete="RESTRICT"), nullable=False)
     montant = Column(Float, nullable=False)
     # en_attente | paye
-    statut_paiement = Column(String, default="en_attente", nullable=False)
+    statut_paiement = Column(String(20), default="en_attente", nullable=False)
     date_calcul = Column(DateTime, default=datetime.utcnow)
     date_paiement = Column(DateTime, nullable=True)
 

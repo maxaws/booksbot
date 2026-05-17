@@ -1,11 +1,24 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { useAuth } from "./contexts/AuthContext";
+import { setUnauthorizedHandler } from "./api";
 import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import Apporteurs from "./pages/Apporteurs";
 import Opportunites from "./pages/Opportunites";
 import Commissions from "./pages/Commissions";
+import Login from "./pages/Login";
 
 export default function App() {
+  const { isAuthenticated, logout } = useAuth();
+
+  // Wire API 401 → auto-logout
+  useEffect(() => {
+    setUnauthorizedHandler(logout);
+  }, [logout]);
+
+  if (!isAuthenticated) return <Login />;
+
   return (
     <Layout>
       <Routes>

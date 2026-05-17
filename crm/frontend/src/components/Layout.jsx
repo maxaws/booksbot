@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 const NAV = [
   { to: "/dashboard",    icon: "📊", label: "Tableau de bord" },
@@ -8,6 +9,8 @@ const NAV = [
 ];
 
 export default function Layout({ children }) {
+  const { logout } = useAuth();
+
   return (
     <div className="layout">
       <aside className="sidebar">
@@ -27,7 +30,17 @@ export default function Layout({ children }) {
             </NavLink>
           ))}
         </nav>
-        <div style={{ padding: "16px 20px", fontSize: "11px", color: "#475569" }}>
+        <div style={{ padding: "12px 8px" }}>
+          <button
+            onClick={logout}
+            className="nav-item"
+            style={{ width: "100%", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
+          >
+            <span className="nav-icon">🚪</span>
+            Déconnexion
+          </button>
+        </div>
+        <div style={{ padding: "8px 20px 16px", fontSize: "11px", color: "#475569" }}>
           v1.0.0 — One System © 2025
         </div>
       </aside>

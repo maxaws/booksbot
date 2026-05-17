@@ -1,13 +1,17 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
 
+from auth import get_current_user
 from database import get_db
 from models import Commission, Opportunite
 from schemas import CommissionOut
 
 router = APIRouter()
+_limiter = Limiter(key_func=get_remote_address)
 
 
 def _to_out(c: Commission) -> CommissionOut:
@@ -28,18 +32,31 @@ def _to_out(c: Commission) -> CommissionOut:
 
 
 @router.get("/", response_model=list[CommissionOut])
-def list_commissions(db: Session = Depends(get_db)):
+def list_commissions(
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=500),
+    db: Session = Depends(get_db),
+    _user: str = Depends(get_current_user),
+):
     commissions = (
         db.query(Commission)
         .join(Opportunite)
         .order_by(Commission.date_calcul.desc())
+        .offset(skip)
+        .limit(limit)
         .all()
     )
     return [_to_out(c) for c in commissions]
 
 
 @router.put("/{commission_id}/marquer-paye", response_model=CommissionOut)
-def marquer_paye(commission_id: int, db: Session = Depends(get_db)):
+@_limiter.limit("20/minute")
+def marquer_paye(
+    request: Request,
+    commission_id: int,
+    db: Session = Depends(get_db),
+    _user: str = Depends(get_current_user),
+):
     commission = db.query(Commission).filter(Commission.id == commission_id).first()
     if not commission:
         raise HTTPException(status_code=404, detail="Commission introuvable")

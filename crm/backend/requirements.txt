@@ -1,4 +1,9 @@
 fastapi==0.115.0
 uvicorn[standard]==0.30.6
 sqlalchemy==2.0.35
-pydantic==2.9.2
+pydantic[email]==2.9.2
+pydantic-settings==2.14.1
+# JWT implémenté en Python stdlib (hmac+hashlib) — pas de python-jose nécessaire
+passlib==1.7.4  # pbkdf2_sha256 via stdlib hashlib
+python-multipart==0.0.12
+slowapi==0.1.9
