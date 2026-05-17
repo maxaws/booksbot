@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>One System CRM</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#2563eb;--primary-dark:#1d4ed8;--primary-light:#dbeafe;
+  --success:#16a34a;--success-light:#dcfce7;
+  --warning:#d97706;--warning-light:#fef3c7;
+  --danger:#dc2626;--danger-light:#fee2e2;
+  --sidebar:#1e293b;--bg:#f1f5f9;--surface:#fff;
+  --border:#e2e8f0;--text:#0f172a;--muted:#64748b;
+  --r:8px
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:14px;color:var(--text);background:var(--bg);line-height:1.5}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:240px;flex-shrink:0;background:var(--sidebar);display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0}
+.logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+.logo .brand{font-size:18px;font-weight:700;color:#fff}
+.logo .sub{font-size:11px;color:#94a3b8;margin-top:2px}
+nav{flex:1;padding:12px 8px}
+.nb{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:6px;color:#94a3b8;font-size:13.5px;font-weight:500;width:100%;border:none;background:none;cursor:pointer;margin-bottom:2px;text-align:left}
+.nb:hover{background:rgba(255,255,255,.08);color:#fff}
+.nb.active{background:var(--primary);color:#fff}
+.ni{font-size:16px;width:20px;text-align:center}
+.main{margin-left:240px;flex:1}
+.page{padding:32px;display:none}
+.page.active{display:block}
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.ptitle{font-size:22px;font-weight:700}
+.psub{font-size:13px;color:var(--muted);margin-top:2px}
+.card{background:var(--surface);border-radius:var(--r);box-shadow:0 1px 3px rgba(0,0,0,.1);border:1px solid var(--border)}
+.card-hd{padding:16px 20px;border-bottom:1px solid var(--border);font-weight:600}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.sc{background:var(--surface);border-radius:var(--r);box-shadow:0 1px 3px rgba(0,0,0,.1);border:1px solid var(--border);padding:20px;display:flex;align-items:flex-start;gap:16px}
+.si{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.si.blue{background:var(--primary-light)}.si.green{background:var(--success-light)}.si.amber{background:var(--warning-light)}.si.red{background:var(--danger-light)}
+.slbl{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.sval{font-size:24px;font-weight:700;margin-top:4px}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;padding:10px 16px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:#f8fafc;border-bottom:1px solid var(--border)}
+tbody tr{border-bottom:1px solid var(--border)}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#f8fafc}
+td{padding:12px 16px;vertical-align:middle}
+.badge{display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600}
+.bx-nouveau{background:#e0f2fe;color:#0369a1}
+.bx-en_cours{background:var(--warning-light);color:#92400e}
+.bx-gagne{background:var(--success-light);color:#14532d}
+.bx-perdu{background:#f1f5f9;color:#475569}
+.bx-attente{background:var(--warning-light);color:#92400e}
+.bx-paye{background:var(--success-light);color:#14532d}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:6px;font-size:13.5px;font-weight:500;cursor:pointer;border:1px solid transparent;font-family:inherit}
+.btn-p{background:var(--primary);color:#fff}.btn-p:hover{background:var(--primary-dark)}
+.btn-s{background:var(--surface);color:var(--text);border-color:var(--border)}.btn-s:hover{background:#f8fafc}
+.btn-ok{background:var(--success);color:#fff}
+.btn-d{background:var(--danger);color:#fff}
+.btn-g{background:transparent;color:var(--muted);border:none}
+.sm{padding:5px 10px;font-size:12.5px}
+.row{display:flex;align-items:center;gap:8px}
+.sb{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--surface);min-width:200px}
+.sb input{border:none;outline:none;font-size:13.5px;flex:1;background:transparent;color:var(--text)}
+.fc{display:block;width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13.5px;color:var(--text);background:var(--surface);outline:none;font-family:inherit}
+.fc:focus{border-color:var(--primary)}
+.fg{margin-bottom:16px}
+.fl{display:block;font-size:13px;font-weight:500;margin-bottom:6px}
+.fl em{color:var(--danger)}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fa{display:flex;justify-content:flex-end;gap:8px;padding-top:12px;border-top:1px solid var(--border);margin-top:12px}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:200;padding:16px;display:none}
+.ov.open{display:flex}
+.modal{background:var(--surface);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.18);width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
+.mhd{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.mbd{padding:20px}
+.fw{font-weight:600}.tm{color:var(--muted)}.tsm{font-size:12.5px}
+.s2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.ai{padding:12px 16px;border-radius:6px;font-size:13px;background:#e0f2fe;border-left:4px solid #0369a1;color:#0c4a6e;margin-bottom:12px}
+.demo{position:fixed;top:12px;right:12px;background:#7c3aed;color:#fff;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;z-index:999;pointer-events:none}
+</style>
+</head>
+<body>
+
+<div class="demo">APERCU - donnees fictives</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="brand">One System</div>
+      <div class="sub">CRM Apporteurs d'affaires</div>
+    </div>
+    <nav>
+      <button class="nb active" data-p="dashboard"    onclick="go('dashboard')">   <span class="ni">&#128202;</span>Tableau de bord</button>
+      <button class="nb"        data-p="apporteurs"   onclick="go('apporteurs')">  <span class="ni">&#128101;</span>Apporteurs</button>
+      <button class="nb"        data-p="opportunites" onclick="go('opportunites')"><span class="ni">&#127919;</span>Opportunites</button>
+      <button class="nb"        data-p="commissions"  onclick="go('commissions')"> <span class="ni">&#128176;</span>Commissions</button>
+    </nav>
+    <div style="padding:8px 20px 16px;font-size:11px;color:#475569;margin-top:auto">v1.0.0 - One System 2025</div>
+  </aside>
+
+  <main class="main">
+    <div id="pg-dashboard"    class="page active"></div>
+    <div id="pg-apporteurs"   class="page"></div>
+    <div id="pg-opportunites" class="page"></div>
+    <div id="pg-commissions"  class="page"></div>
+  </main>
+</div>
+
+<div id="ov" class="ov" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="mhd"><strong id="mtitle" style="font-size:16px"></strong><button class="btn btn-g sm" onclick="closeModal()">&#10005;</button></div>
+    <div class="mbd" id="mbody"></div>
+  </div>
+</div>
+
+<script>
+var APPORTEURS = [
+  {id:1, prenom:"Sophie",  nom:"Martin",  email:"s.martin@nexusco.fr",     tel:"06 12 34 56 78", societe:"NexusCo",     taux:12, actif:true,  nbopp:4, ca:87000},
+  {id:2, prenom:"Thomas",  nom:"Durand",  email:"t.durand@td-conseil.fr",  tel:"07 23 45 67 89", societe:"TD Conseil",  taux:10, actif:true,  nbopp:6, ca:142500},
+  {id:3, prenom:"Marie",   nom:"Leblanc", email:"m.leblanc@mlpartners.com",tel:"06 87 65 43 21", societe:"ML Partners", taux:8,  actif:true,  nbopp:3, ca:35000},
+  {id:4, prenom:"Nicolas", nom:"Bernard", email:"n.bernard@freelance.fr",  tel:"",               societe:"",            taux:15, actif:false, nbopp:2, ca:18000},
+  {id:5, prenom:"Camille", nom:"Petit",   email:"c.petit@cbiz.fr",         tel:"06 55 44 33 22", societe:"C-Biz",       taux:11, actif:true,  nbopp:2, ca:63000}
+];
+
+var OPPORTUNITES = [
+  {id:1, apporteur:"Thomas Durand",  prospect:"Lemaire SA",              societe:"Lemaire SA",         montant:45000, statut:"gagne",    creation:"12/09/2024", cloture:"03/11/2024"},
+  {id:2, apporteur:"Sophie Martin",  prospect:"Fabrice Chauvin",         societe:"Chauvin et Fils",    montant:22000, statut:"en_cours", creation:"01/10/2024", cloture:"-"},
+  {id:3, apporteur:"Camille Petit",  prospect:"Groupe Horizon",          societe:"Groupe Horizon SAS", montant:63000, statut:"gagne",    creation:"20/08/2024", cloture:"15/10/2024"},
+  {id:4, apporteur:"Thomas Durand",  prospect:"OptimPro",                societe:"OptimPro",           montant:38000, statut:"en_cours", creation:"05/11/2024", cloture:"-"},
+  {id:5, apporteur:"Sophie Martin",  prospect:"Renault Distribution Est",societe:"RDE",                montant:87000, statut:"gagne",    creation:"15/07/2024", cloture:"30/09/2024"},
+  {id:6, apporteur:"Marie Leblanc",  prospect:"Startup Innov",           societe:"",                   montant:12000, statut:"perdu",    creation:"20/10/2024", cloture:"10/11/2024"},
+  {id:7, apporteur:"Thomas Durand",  prospect:"Logis et Co",             societe:"Logis et Co",        montant:59500, statut:"gagne",    creation:"01/06/2024", cloture:"12/08/2024"},
+  {id:8, apporteur:"Nicolas Bernard",prospect:"Axel Moreau",             societe:"AM Conseil",         montant:18000, statut:"nouveau",  creation:"15/11/2024", cloture:"-"}
+];
+
+var COMMISSIONS = [
+  {id:1, apporteur:"Thomas Durand", prospect:"Lemaire SA",              societe:"Lemaire SA",         affaire:45000, montant:4500,  statut:"paye",    calcule:"03/11/2024", paye:"30/11/2024"},
+  {id:2, apporteur:"Camille Petit", prospect:"Groupe Horizon",          societe:"Groupe Horizon SAS", affaire:63000, montant:6930,  statut:"attente", calcule:"15/10/2024", paye:"-"},
+  {id:3, apporteur:"Sophie Martin", prospect:"Renault Distribution Est",societe:"RDE",                affaire:87000, montant:10440, statut:"attente", calcule:"30/09/2024", paye:"-"},
+  {id:4, apporteur:"Thomas Durand", prospect:"Logis et Co",             societe:"Logis et Co",        affaire:59500, montant:5950,  statut:"paye",    calcule:"12/08/2024", paye:"01/09/2024"}
+];
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function eur(n) {
+  return new Intl.NumberFormat("fr-FR", {style:"currency", currency:"EUR", maximumFractionDigits:0}).format(n);
+}
+var SLBL = {nouveau:"Nouveau", en_cours:"En cours", gagne:"Gagne", perdu:"Perdu"};
+
+// ── Navigation ───────────────────────────────────────────────────────────────
+var curPage = "dashboard";
+function go(page) {
+  document.querySelectorAll(".nb").forEach(function(b){ b.classList.toggle("active", b.dataset.p === page); });
+  document.querySelectorAll(".page").forEach(function(p){ p.classList.remove("active"); });
+  document.getElementById("pg-" + page).classList.add("active");
+  curPage = page;
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function openModal(title, html) {
+  document.getElementById("mtitle").textContent = title;
+  document.getElementById("mbody").innerHTML = html;
+  document.getElementById("ov").classList.add("open");
+}
+function closeModal() {
+  document.getElementById("ov").classList.remove("open");
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+function renderDashboard() {
+  var top = APPORTEURS.slice().sort(function(a,b){ return b.ca - a.ca; });
+  var medals = ["1.", "2.", "3.", "4.", "5."];
+  var topRows = top.map(function(a, i) {
+    return "<tr><td style='font-weight:700;color:" + (i===0?"#f59e0b":"inherit") + "'>" + medals[i] + "</td>" +
+      "<td class='fw'>" + a.prenom + " " + a.nom + "</td>" +
+      "<td class='fw' style='color:var(--success)'>" + eur(a.ca) + "</td>" +
+      "<td>" + a.nbopp + "</td></tr>";
+  }).join("");
+
+  document.getElementById("pg-dashboard").innerHTML =
+    "<div class='ph'>" +
+      "<div><div class='ptitle'>Tableau de bord</div><div class='psub'>Vue d'ensemble de l'activite des apporteurs</div></div>" +
+    "</div>" +
+    "<div class='sg'>" +
+      "<div class='sc'><div class='si blue'>&#128101;</div><div><div class='slbl'>Apporteurs actifs</div><div class='sval'>4</div></div></div>" +
+      "<div class='sc'><div class='si amber'>&#127919;</div><div><div class='slbl'>Opportunites en cours</div><div class='sval'>3</div></div></div>" +
+      "<div class='sc'><div class='si green'>&#128200;</div><div><div class='slbl'>CA gagne</div><div class='sval'>" + eur(254500) + "</div></div></div>" +
+      "<div class='sc'><div class='si red'>&#128176;</div><div><div class='slbl'>Commissions dues</div><div class='sval'>" + eur(17370) + "</div></div></div>" +
+    "</div>" +
+    "<div class='card'>" +
+      "<div class='card-hd'>Top 5 apporteurs (CA gagne)</div>" +
+      "<div class='tw'><table>" +
+        "<thead><tr><th>#</th><th>Apporteur</th><th>CA total</th><th>Opportunites</th></tr></thead>" +
+        "<tbody>" + topRows + "</tbody>" +
+      "</table></div>" +
+    "</div>";
+}
+
+// ── Apporteurs ────────────────────────────────────────────────────────────────
+var appQ = "";
+function renderApporteurs() {
+  var q = appQ.toLowerCase();
+  var list = APPORTEURS.filter(function(a) {
+    return (a.prenom + " " + a.nom + " " + a.email + " " + a.societe).toLowerCase().indexOf(q) >= 0;
+  });
+  var rows = list.map(function(a) {
+    return "<tr>" +
+      "<td><div class='fw'>" + a.prenom + " " + a.nom + "</div></td>" +
+      "<td class='tm'>" + (a.societe || "-") + "</td>" +
+      "<td><div>" + a.email + "</div>" + (a.tel ? "<div class='tm tsm'>" + a.tel + "</div>" : "") + "</td>" +
+      "<td class='fw'>" + a.taux + "%</td>" +
+      "<td class='fw' style='color:var(--success)'>" + eur(a.ca) + "</td>" +
+      "<td>" + a.nbopp + "</td>" +
+      "<td><span class='badge " + (a.actif ? "bx-gagne" : "bx-perdu") + "'>" + (a.actif ? "Actif" : "Inactif") + "</span></td>" +
+      "<td><div class='row'><button class='btn btn-s sm' onclick='openAppModal(" + a.id + ")'>Modifier</button></div></td>" +
+    "</tr>";
+  }).join("");
+
+  document.getElementById("pg-apporteurs").innerHTML =
+    "<div class='ph'>" +
+      "<div><div class='ptitle'>Apporteurs d'affaires</div><div class='psub'>" + APPORTEURS.length + " apporteurs enregistres</div></div>" +
+      "<div class='row'>" +
+        "<div class='sb'>&#128269;<input placeholder='Rechercher...' value='" + appQ + "' oninput=\"appQ=this.value;renderApporteurs()\"/></div>" +
+        "<button class='btn btn-p' onclick=\"openAppModal(0)\">+ Nouvel apporteur</button>" +
+      "</div>" +
+    "</div>" +
+    "<div class='card'><div class='tw'><table>" +
+      "<thead><tr><th>Nom</th><th>Societe</th><th>Contact</th><th>Commission</th><th>CA genere</th><th>Opp.</th><th>Statut</th><th></th></tr></thead>" +
+      "<tbody>" + rows + "</tbody>" +
+    "</table></div></div>";
+}
+
+function openAppModal(id) {
+  var a = APPORTEURS.find(function(x){ return x.id === id; });
+  var title = a ? "Modifier l'apporteur" : "Nouvel apporteur";
+  openModal(title,
+    "<div class='fg2'>" +
+      "<div class='fg'><label class='fl'>Prenom <em>*</em></label><input class='fc' value='" + (a ? a.prenom : "") + "'/></div>" +
+      "<div class='fg'><label class='fl'>Nom <em>*</em></label><input class='fc' value='" + (a ? a.nom : "") + "'/></div>" +
+    "</div>" +
+    "<div class='fg'><label class='fl'>Email <em>*</em></label><input class='fc' type='email' value='" + (a ? a.email : "") + "'/></div>" +
+    "<div class='fg2'>" +
+      "<div class='fg'><label class='fl'>Telephone</label><input class='fc' value='" + (a ? a.tel : "") + "'/></div>" +
+      "<div class='fg'><label class='fl'>Societe</label><input class='fc' value='" + (a ? a.societe : "") + "'/></div>" +
+    "</div>" +
+    "<div class='fg'><label class='fl'>Taux de commission (%) <em>*</em></label><input class='fc' type='number' min='0' max='100' value='" + (a ? a.taux : 10) + "'/></div>" +
+    "<div class='fa'><button class='btn btn-s' onclick='closeModal()'>Annuler</button><button class='btn btn-p' onclick='closeModal()'>Enregistrer</button></div>"
+  );
+}
+
+// ── Opportunites ──────────────────────────────────────────────────────────────
+var oppQ = "", oppF = "";
+function renderOpportunites() {
+  var q = oppQ.toLowerCase();
+  var list = OPPORTUNITES.filter(function(o) {
+    return (o.prospect + " " + o.societe + " " + o.apporteur).toLowerCase().indexOf(q) >= 0 &&
+           (!oppF || o.statut === oppF);
+  });
+  var rows = list.map(function(o) {
+    return "<tr>" +
+      "<td><div class='fw'>" + o.prospect + "</div>" + (o.societe ? "<div class='tm tsm'>" + o.societe + "</div>" : "") + "</td>" +
+      "<td>" + o.apporteur + "</td>" +
+      "<td class='fw'>" + eur(o.montant) + "</td>" +
+      "<td><span class='badge bx-" + o.statut + "'>" + SLBL[o.statut] + "</span></td>" +
+      "<td class='tm'>" + o.creation + "</td>" +
+      "<td class='tm'>" + o.cloture + "</td>" +
+      "<td><button class='btn btn-s sm' onclick='openOppModal(" + o.id + ")'>Modifier</button></td>" +
+    "</tr>";
+  }).join("");
+
+  var selOpts = ["", "nouveau", "en_cours", "gagne", "perdu"].map(function(v) {
+    return "<option value='" + v + "'" + (oppF === v ? " selected" : "") + ">" + (v ? SLBL[v] : "Tous les statuts") + "</option>";
+  }).join("");
+
+  document.getElementById("pg-opportunites").innerHTML =
+    "<div class='ph'>" +
+      "<div><div class='ptitle'>Opportunites</div><div class='psub'>" + OPPORTUNITES.length + " opportunites</div></div>" +
+      "<div class='row'>" +
+        "<div class='sb'>&#128269;<input placeholder='Rechercher...' value='" + oppQ + "' oninput=\"oppQ=this.value;renderOpportunites()\"/></div>" +
+        "<select class='fc' style='width:auto' onchange=\"oppF=this.value;renderOpportunites()\">" + selOpts + "</select>" +
+        "<button class='btn btn-p' onclick=\"openOppModal(0)\">+ Nouvelle opportunite</button>" +
+      "</div>" +
+    "</div>" +
+    "<div class='card'><div class='tw'><table>" +
+      "<thead><tr><th>Prospect</th><th>Apporteur</th><th>Montant estime</th><th>Statut</th><th>Creation</th><th>Cloture</th><th></th></tr></thead>" +
+      "<tbody>" + rows + "</tbody>" +
+    "</table></div></div>";
+}
+
+function openOppModal(id) {
+  var o = OPPORTUNITES.find(function(x){ return x.id === id; });
+  var optA = APPORTEURS.map(function(a) {
+    return "<option" + (o && o.apporteur === a.prenom + " " + a.nom ? " selected" : "") + ">" + a.prenom + " " + a.nom + "</option>";
+  }).join("");
+  var optS = ["nouveau","en_cours","gagne","perdu"].map(function(s) {
+    return "<option value='" + s + "'" + (o && o.statut === s ? " selected" : "") + ">" + SLBL[s] + "</option>";
+  }).join("");
+  openModal(o ? "Modifier l'opportunite" : "Nouvelle opportunite",
+    "<div class='fg'><label class='fl'>Apporteur <em>*</em></label><select class='fc'>" + optA + "</select></div>" +
+    "<div class='fg2'>" +
+      "<div class='fg'><label class='fl'>Prospect <em>*</em></label><input class='fc' value='" + (o ? o.prospect : "") + "'/></div>" +
+      "<div class='fg'><label class='fl'>Societe</label><input class='fc' value='" + (o ? o.societe : "") + "'/></div>" +
+    "</div>" +
+    "<div class='fg2'>" +
+      "<div class='fg'><label class='fl'>Montant estime</label><input class='fc' type='number' value='" + (o ? o.montant : 0) + "'/></div>" +
+      "<div class='fg'><label class='fl'>Statut</label><select class='fc'>" + optS + "</select></div>" +
+    "</div>" +
+    "<div class='fg'><label class='fl'>Description</label><textarea class='fc' style='min-height:70px'></textarea></div>" +
+    "<div class='ai'>Une commission est calculee automatiquement quand le statut passe a Gagne.</div>" +
+    "<div class='fa'><button class='btn btn-s' onclick='closeModal()'>Annuler</button><button class='btn btn-p' onclick='closeModal()'>Enregistrer</button></div>"
+  );
+}
+
+// ── Commissions ───────────────────────────────────────────────────────────────
+var comF = "";
+function renderCommissions() {
+  var list = comF ? COMMISSIONS.filter(function(c){ return c.statut === comF; }) : COMMISSIONS;
+  var dues = COMMISSIONS.filter(function(c){ return c.statut === "attente"; }).reduce(function(s,c){ return s + c.montant; }, 0);
+  var paye = COMMISSIONS.filter(function(c){ return c.statut === "paye"; }).reduce(function(s,c){ return s + c.montant; }, 0);
+
+  var rows = list.map(function(c) {
+    var btn = c.statut === "attente"
+      ? "<button class='btn btn-ok sm' onclick='payerCommission(" + c.id + ")'>Marquer payee</button>"
+      : "";
+    return "<tr>" +
+      "<td class='fw'>" + c.apporteur + "</td>" +
+      "<td><div>" + c.prospect + "</div>" + (c.societe ? "<div class='tm tsm'>" + c.societe + "</div>" : "") + "</td>" +
+      "<td>" + eur(c.affaire) + "</td>" +
+      "<td class='fw' style='color:var(--primary)'>" + eur(c.montant) + "</td>" +
+      "<td><span class='badge bx-" + c.statut + "'>" + (c.statut === "paye" ? "Payee" : "En attente") + "</span></td>" +
+      "<td class='tm'>" + c.calcule + "</td>" +
+      "<td class='tm'>" + c.paye + "</td>" +
+      "<td>" + btn + "</td>" +
+    "</tr>";
+  }).join("");
+
+  var selOpts = [["","Toutes"],["attente","En attente"],["paye","Payees"]].map(function(v) {
+    return "<option value='" + v[0] + "'" + (comF === v[0] ? " selected" : "") + ">" + v[1] + "</option>";
+  }).join("");
+
+  document.getElementById("pg-commissions").innerHTML =
+    "<div class='ph'>" +
+      "<div><div class='ptitle'>Commissions</div><div class='psub'>Suivi des commissions dues aux apporteurs</div></div>" +
+      "<div class='row'><select class='fc' style='width:auto' onchange=\"comF=this.value;renderCommissions()\">" + selOpts + "</select></div>" +
+    "</div>" +
+    "<div class='s2'>" +
+      "<div class='sc'><div class='si amber'>&#128179;</div><div><div class='slbl'>Commissions dues</div><div class='sval' style='color:var(--warning)'>" + eur(dues) + "</div></div></div>" +
+      "<div class='sc'><div class='si green'>&#10003;</div><div><div class='slbl'>Commissions payees</div><div class='sval' style='color:var(--success)'>" + eur(paye) + "</div></div></div>" +
+    "</div>" +
+    "<div class='card'><div class='tw'><table>" +
+      "<thead><tr><th>Apporteur</th><th>Prospect</th><th>Montant affaire</th><th>Commission</th><th>Statut</th><th>Calculee le</th><th>Payee le</th><th></th></tr></thead>" +
+      "<tbody>" + rows + "</tbody>" +
+    "</table></div></div>";
+}
+
+function payerCommission(id) {
+  var c = COMMISSIONS.find(function(x){ return x.id === id; });
+  if (c) {
+    c.statut = "paye";
+    c.paye = new Date().toLocaleDateString("fr-FR");
+  }
+  renderCommissions();
+  renderDashboard();
+}
+
+// ── Init (appelé en dernier) ─────────────────────────────────────────────────
+renderDashboard();
+renderApporteurs();
+renderOpportunites();
+renderCommissions();
+</script>
+</body>
+</html>
