@@ -1,0 +1,42 @@
+# Copie ce fichier en config.yaml puis adapte-le.
+
+# "paper" = argent fictif avec les vrais prix (par défaut, recommandé pendant
+# plusieurs semaines). "live" = argent réel (exige aussi l'option --live).
+mode: paper
+
+# Paires Coinbase, toutes dans la même devise (EUR, USD, USDC...).
+products: [BTC-EUR, ETH-EUR]
+
+# Taille des bougies : FIVE_MINUTE, FIFTEEN_MINUTE, THIRTY_MINUTE, ONE_HOUR,
+# TWO_HOUR, SIX_HOUR, ONE_DAY. Plus c'est court, plus il y a de trades... et de frais.
+granularity: ONE_HOUR
+
+# Stratégies : ema_cross (suivi de tendance) ou mean_reversion (achat de repli)
+strategy: ema_cross
+strategy_params:
+  fast: 9
+  slow: 21
+  trend: 200
+  rsi_max: 70
+  atr_stop_mult: 2.0
+  reward_risk: 2.0
+
+# Budget maximum que le robot peut utiliser (devise de cotation).
+capital: 100
+
+risk:
+  risk_per_trade_pct: 1.0     # perte max si le stop est touché, en % du capital
+  max_position_pct: 50        # taille max d'une position, en % du capital
+  max_open_positions: 2
+  daily_loss_limit_pct: 3     # plus d'entrées pour la journée au-delà
+  max_drawdown_pct: 15        # coupe-circuit : tout vendre et s'arrêter
+  min_order_quote: 5
+
+# Frais "taker" de TON palier Coinbase Advanced (Paramètres > Frais).
+# Pour les petits volumes ils sont élevés : vérifie la valeur exacte.
+fee_pct: 1.2
+slippage_pct: 0.05
+
+poll_seconds: 30
+state_file: data/state.json
+journal_file: data/trades.csv
