@@ -13,7 +13,36 @@ from .risk import RiskManager
 from .strategies import build_strategy
 
 
+def cmd_backtest_portfolio(cfg, args):
+    from .portfolio import PORTFOLIO_STRATEGIES, backtest_weights, buy_and_hold, load_closes
+
+    products = [args.product] if args.product else cfg.products
+    closes = load_closes(products, args.days)
+    fn = PORTFOLIO_STRATEGIES[cfg.strategy]
+    strat = backtest_weights(closes, fn(closes, **cfg.strategy_params), cfg.fee_pct, cfg.slippage_pct, cfg.capital)
+    hold = backtest_weights(closes, buy_and_hold(closes), cfg.fee_pct, cfg.slippage_pct, cfg.capital)
+    # On ignore la période de chauffe des moyennes mobiles (200 jours par défaut)
+    warmup = max(cfg.strategy_params.get("smas", [200]))
+    start = closes.index[min(warmup, len(closes) - 2)]
+    labels = {
+        "rendement_total_pct": "Rendement total (%)", "rendement_annuel_pct": "Rendement annuel (%)",
+        "drawdown_max_pct": "Pire chute (%)", "volatilite_pct": "Volatilité annuelle (%)",
+        "sharpe": "Sharpe (rendement/risque)", "exposition_pct": "Temps investi (%)",
+    }
+    s, h = strat.stats(start), hold.stats(start)
+    print(f"=== {cfg.strategy} sur {', '.join(products)} : {start:%Y-%m-%d} -> {closes.index[-1]:%Y-%m-%d} ===")
+    print(f"{'':28}{'Stratégie':>12}{'Acheter & garder':>18}")
+    for k, label in labels.items():
+        print(f"{label:28}{s[k]:>12.2f}{h[k]:>18.2f}")
+    final = lambda st: cfg.capital * (1 + st["rendement_total_pct"] / 100)  # noqa: E731
+    print(f"{cfg.capital:.0f} investis deviennent {final(s):.2f} (stratégie) contre {final(h):.2f} (acheter & garder)")
+
+
 def cmd_backtest(cfg, args):
+    from .portfolio import PORTFOLIO_STRATEGIES
+
+    if cfg.strategy in PORTFOLIO_STRATEGIES:
+        return cmd_backtest_portfolio(cfg, args)
     strategy = build_strategy(cfg.strategy, cfg.strategy_params)
     products = [args.product] if args.product else cfg.products
     for product in products:
@@ -38,7 +67,7 @@ def make_broker(cfg, live: bool):
 
 
 def cmd_run(cfg, args):
-    from .bot import TradingBot
+    from .bot import make_bot
     broker = make_broker(cfg, args.live)
     if cfg.mode == "live":
         available = broker.available_quote(cfg.quote_currency)
@@ -46,7 +75,7 @@ def cmd_run(cfg, args):
               f"Budget du robot : {cfg.capital:.2f}.")
         if input("Tape OUI pour lancer le trading avec de l'argent réel : ").strip() != "OUI":
             sys.exit("Annulé.")
-    bot = TradingBot(cfg, broker)
+    bot = make_bot(cfg, broker)
     if args.once:
         bot.step()
     else:
@@ -89,6 +118,13 @@ def cmd_check_keys(cfg, args):
         print(f"  {a['currency']:>6} : {a['available_balance']['value']}")
 
 
+def cmd_report(cfg, args):
+    from .report import build_report
+
+    path = build_report(cfg, args.out, standalone=not args.fragment)
+    print(f"Rapport généré : {path.resolve()} (ouvre-le dans ton navigateur)")
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(prog="tradingbot", description="Robot de trading court terme (Coinbase)")
     p.add_argument("-c", "--config", default="config.yaml")
@@ -109,6 +145,10 @@ def main(argv=None):
     rs = sub.add_parser("reset", help="réarmer le coupe-circuit")
     rs.add_argument("--all", action="store_true", help="effacer tout l'état (repartir de zéro)")
     rs.set_defaults(func=cmd_reset)
+    rp = sub.add_parser("report", help="rapport de marché HTML à jour")
+    rp.add_argument("--out", default="data/rapport.html")
+    rp.add_argument("--fragment", action="store_true", help=argparse.SUPPRESS)
+    rp.set_defaults(func=cmd_report)
     sub.add_parser("check-keys", help="vérifier les clés API Coinbase").set_defaults(func=cmd_check_keys)
 
     args = p.parse_args(argv)

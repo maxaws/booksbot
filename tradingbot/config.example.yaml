@@ -7,36 +7,47 @@ mode: paper
 # Paires Coinbase, toutes dans la même devise (EUR, USD, USDC...).
 products: [BTC-EUR, ETH-EUR]
 
-# Taille des bougies : FIVE_MINUTE, FIFTEEN_MINUTE, THIRTY_MINUTE, ONE_HOUR,
-# TWO_HOUR, SIX_HOUR, ONE_DAY. Plus c'est court, plus il y a de trades... et de frais.
-granularity: ONE_HOUR
-
-# Stratégies : ema_cross (suivi de tendance) ou mean_reversion (achat de repli)
-strategy: ema_cross
+# --- Stratégie -----------------------------------------------------------------
+# Stratégie recommandée : trend_ensemble (suivi de tendance progressif, bougies
+# journalières, rééquilibrage au plus une fois par jour). C'est la seule qui a
+# tenu sur une période de test jamais vue (voir README, « Résultats »).
+#
+# Autres choix possibles :
+#   - trend_filter, momentum_rotation : portefeuille, journalier
+#   - ema_cross, mean_reversion : trading intraday (déconseillé : les frais
+#     Coinbase les rendent perdantes en backtest)
+strategy: trend_ensemble
 strategy_params:
-  fast: 9
-  slow: 21
-  trend: 200
-  rsi_max: 70
-  atr_stop_mult: 2.0
-  reward_risk: 2.0
+  smas: [50, 100, 200]   # moyennes mobiles en jours ; part investie = nb de moyennes sous le prix / 3
+  buffer_pct: 2          # zone tampon autour de chaque moyenne (évite les allers-retours)
+  check_days: 1          # 1 = décision chaque jour, 7 = chaque semaine
+
+# Uniquement pour ema_cross / mean_reversion :
+granularity: ONE_HOUR
 
 # Budget maximum que le robot peut utiliser (devise de cotation).
 capital: 100
 
 risk:
-  risk_per_trade_pct: 1.0     # perte max si le stop est touché, en % du capital
-  max_position_pct: 50        # taille max d'une position, en % du capital
-  max_open_positions: 2
-  daily_loss_limit_pct: 3     # plus d'entrées pour la journée au-delà
-  max_drawdown_pct: 15        # coupe-circuit : tout vendre et s'arrêter
+  risk_per_trade_pct: 1.0     # (intraday) perte max si le stop est touché, en % du capital
+  max_position_pct: 50        # (intraday) taille max d'une position, en % du capital
+  max_open_positions: 2       # (intraday)
+  daily_loss_limit_pct: 10    # plus de nouveaux achats pour la journée au-delà
+  # Coupe-circuit : tout vendre et s'arrêter. trend_ensemble a connu une chute
+  # de près de 50 % en backtest (2021) : un seuil plus bas l'aurait arrêtée en
+  # plein milieu d'une baisse « normale » pour elle. Ici il sert de filet de
+  # sécurité en cas de bug ou de krach extrême. Mets 15 pour l'intraday.
+  max_drawdown_pct: 55
   min_order_quote: 5
+
+# Rééquilibrage seulement si l'écart dépasse ce % du capital (évite les micro-ordres).
+rebalance_threshold_pct: 5
 
 # Frais "taker" de TON palier Coinbase Advanced (Paramètres > Frais).
 # Pour les petits volumes ils sont élevés : vérifie la valeur exacte.
 fee_pct: 1.2
 slippage_pct: 0.05
 
-poll_seconds: 30
+poll_seconds: 60
 state_file: data/state.json
 journal_file: data/trades.csv

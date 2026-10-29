@@ -1,0 +1,226 @@
+<title>Point marché crypto</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Mise en page : une colonne de lecture (résumé -> décision -> détail -> preuve), tableaux défilants sur mobile. */
+:root {
+  --bg: #f5f7fa; --surface: #ffffff; --ink: #13171d; --ink-2: #4c5461; --ink-3: #6b7380;
+  --line: #e1e5eb; --grid: #edf0f4; --accent: #2a78d6; --tint: #eef4fc;
+  --s0: #b4bac4; --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+  --good: #0ca30c; --warning: #fab219; --serious: #ec835a; --critical: #d03b3b;
+  --up: #0b7a35; --down: #b8302f;
+  --f-display: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1216; --surface: #171b21; --ink: #eef1f5; --ink-2: #b3bbc7; --ink-3: #8f98a5;
+    --line: #2a3039; --grid: #222830; --accent: #3987e5; --tint: #18263a;
+    --s0: #5d6573; --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+    --up: #4cc27a; --down: #f07a78; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1216; --surface: #171b21; --ink: #eef1f5; --ink-2: #b3bbc7; --ink-3: #8f98a5;
+  --line: #2a3039; --grid: #222830; --accent: #3987e5; --tint: #18263a;
+  --s0: #5d6573; --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+  --up: #4cc27a; --down: #f07a78; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-block: 28px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 40px; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 600; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.1; }
+h2 { font-size: 24px; line-height: 1.2; }
+h3 { font-size: 17px; }
+p { margin: 0; max-width: 68ch; }
+.eyebrow { font-family: var(--f-data); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+.lead { font-size: 17px; color: var(--ink-2); }
+.muted { color: var(--ink-3); font-size: 13px; }
+section { display: grid; gap: 16px; min-width: 0; }
+.num, .data { font-family: var(--f-data); font-variant-numeric: tabular-nums; }
+.up { color: var(--up); } .down { color: var(--down); } .na { color: var(--ink-3); }
+
+header.top { display: grid; gap: 14px; }
+.verdict { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px 2px 8px; border-radius: 999px;
+  background: var(--grid); color: var(--ink); font-size: 13px; font-weight: 500; white-space: nowrap; font-family: var(--f-body); }
+.pill b { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-3); flex: none; }
+.pill.good b { background: var(--good); } .pill.warning b { background: var(--warning); }
+.pill.serious b { background: var(--serious); } .pill.critical b { background: var(--critical); }
+.pill.lg { font-size: 15px; padding: 4px 14px 4px 10px; } .pill.lg b { width: 10px; height: 10px; }
+.pill.sm { font-size: 12px; font-family: var(--f-data); }
+
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1px; background: var(--line);
+  border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.kpi { background: var(--surface); padding: 14px 16px; display: grid; gap: 2px; align-content: start; }
+.kpi .v { font-family: var(--f-data); font-size: 22px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.kpi .l { font-size: 13px; color: var(--ink-3); }
+
+.robot { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 14px; }
+.alloc { display: flex; gap: 2px; height: 28px; border-radius: 6px; overflow: hidden; }
+.alloc .seg { min-width: 4px; }
+.s0 { background: var(--s0); } .s1 { background: var(--s1); } .s2 { background: var(--s2); }
+.s3 { background: var(--s3); } .s4 { background: var(--s4); }
+.legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; }
+.legend li { display: inline-flex; align-items: center; gap: 7px; }
+.legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.legend i.line { height: 3px; border-radius: 2px; width: 16px; }
+
+.chart-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 16px 8px; display: grid; gap: 10px; min-width: 0; }
+.chart { position: relative; width: 100%; min-width: 0; }
+.chart svg { display: block; width: 100%; overflow: visible; }
+.chart text { font-family: var(--f-data); font-size: 11px; fill: var(--ink-3); }
+.chart .end { font-size: 12px; fill: var(--ink-2); }
+.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+  padding: 8px 10px; font-size: 12px; font-family: var(--f-data); box-shadow: 0 4px 16px rgb(0 0 0 / 0.12); min-width: 150px; z-index: 2; }
+.tip .d { color: var(--ink-3); margin-bottom: 4px; }
+.tip .r { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
+.tip .r span:first-child { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-2); }
+.tip i { width: 10px; height: 3px; border-radius: 2px; display: inline-block; }
+
+.table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { padding: 10px 12px; text-align: left; vertical-align: middle; }
+thead th { font-family: var(--f-data); font-size: 11px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--ink-3); border-bottom: 1px solid var(--line); white-space: nowrap; background: var(--surface); }
+td.num, th.num { text-align: right; white-space: nowrap; }
+tbody th { font-weight: 600; white-space: nowrap; }
+tbody th .sym { display: block; font-family: var(--f-data); }
+tbody th .nm { display: block; font-weight: 400; font-size: 12px; color: var(--ink-3); }
+tbody tr.comment td { padding-top: 0; color: var(--ink-2); font-size: 13px; border-bottom: 1px solid var(--line); }
+tbody tr.comment:last-child td { border-bottom: 0; }
+table.bt tbody tr td, table.bt tbody tr th { border-bottom: 1px solid var(--line); }
+table.bt tbody tr:last-child td, table.bt tbody tr:last-child th { border-bottom: 0; }
+.trend-cell { white-space: nowrap; }
+.dots { display: inline-flex; gap: 3px; margin-left: 8px; vertical-align: middle; }
+.dots i { width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid var(--ink-3); }
+.dots i.on { background: var(--ink-2); border-color: var(--ink-2); }
+
+details { border-top: 1px solid var(--line); padding-top: 8px; }
+summary { cursor: pointer; color: var(--accent); font-size: 13px; padding: 4px 0; }
+summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+details .table-scroll { margin-top: 8px; max-height: 320px; overflow: auto; }
+details table { font-size: 12px; font-family: var(--f-data); }
+details td, details th { padding: 4px 10px; }
+
+.lexique { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px 28px; margin: 0; }
+.lexique div { display: grid; gap: 4px; }
+.lexique dt { font-weight: 600; } .lexique dd { margin: 0; color: var(--ink-2); font-size: 14px; }
+.note { border-left: 3px solid var(--line); padding: 4px 0 4px 14px; color: var(--ink-2); font-size: 14px; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+@media (max-width: 520px) { .robot { padding: 16px; } .kpi .v { font-size: 19px; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">Données Coinbase · $generated</span>
+    <div class="verdict"><h1>Point marché crypto</h1><span class="pill lg $tone"><b></b>$verdict</span></div>
+    <p class="lead">$summary</p>
+  </header>
+
+  <div class="kpis" role="list">
+    <div class="kpi" role="listitem"><span class="l">Bitcoin</span><span class="v">$btc_price</span><span class="l">$btc_p30 sur 30 jours</span></div>
+    <div class="kpi" role="listitem"><span class="l">Cryptos en tendance de fond haussière</span><span class="v">$breadth / $n</span><span class="l">au-dessus de leur moyenne 200 j</span></div>
+    <div class="kpi" role="listitem"><span class="l">$top_label</span><span class="v">$top_sym</span><span class="l">$top_p30</span></div>
+    <div class="kpi" role="listitem"><span class="l">Plus faible sur 30 jours</span><span class="v">$worst_sym</span><span class="l">$worst_p30</span></div>
+  </div>
+
+  <section class="robot" aria-labelledby="robot-h">
+    <span class="eyebrow">Décision de la stratégie · clôture du $decided_on</span>
+    <h2 id="robot-h">Ce que ferait le robot aujourd'hui</h2>
+    <p>Répartition visée par la stratégie de suivi de tendance sur $products. Elle augmente la part investie quand
+      les prix passent au-dessus de leurs moyennes 50, 100 et 200 jours, et la réduit quand ils repassent en dessous.</p>
+    <div class="alloc" role="img" aria-label="Répartition visée">$alloc_bar</div>
+    <ul class="legend">$alloc_legend</ul>
+    <p class="muted">La stratégie garde une marge de 2 % autour de chaque moyenne : elle ne réduit une position que si le prix
+      passe nettement en dessous. Sa répartition peut donc différer un peu de la colonne « Tendance » du tableau ci-dessous.</p>
+  </section>
+
+  <section aria-labelledby="btc-h">
+    <h2 id="btc-h">Bitcoin et ses moyennes mobiles</h2>
+    <p class="muted">Un an de clôtures journalières, en euros. Quand le prix (bleu) est au-dessus des trois moyennes, la tendance de fond est haussière.</p>
+    <div class="chart-card">
+      <ul class="legend" id="btc-legend"></ul>
+      <div class="chart" id="btc-chart"></div>
+      <details><summary>Voir les données (fin de mois)</summary><div class="table-scroll" id="btc-table"></div></details>
+    </div>
+  </section>
+
+  <section aria-labelledby="assets-h">
+    <h2 id="assets-h">Les cryptos, une par une</h2>
+    <p class="muted">Classées par performance sur 30 jours. Les trois points indiquent les moyennes 50, 100 et 200 jours que le prix dépasse.</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr>
+          <th scope="col">Crypto</th><th scope="col" class="num">Prix</th><th scope="col" class="num">24 h</th>
+          <th scope="col" class="num">7 j</th><th scope="col" class="num">30 j</th><th scope="col" class="num">1 an</th>
+          <th scope="col">Tendance</th><th scope="col" class="num">RSI</th><th scope="col" class="num">Agitation</th>
+          <th scope="col" class="num">vs plus haut 1 an</th>
+        </tr></thead>
+        <tbody>$rows</tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="bt-h">
+    <h2 id="bt-h">La stratégie a-t-elle fait ses preuves ?</h2>
+    <p class="lead">$headline</p>
+    <p class="muted">Backtest journalier sur $products, frais de $fee % par ordre inclus. Les réglages ont été choisis sur la période
+      d'apprentissage, puis vérifiés sur la période de test, que la stratégie n'avait jamais vue.</p>
+    <div class="table-scroll">
+      <table class="bt">
+        <thead><tr>
+          <th scope="col">Période</th>
+          <th scope="col" class="num">Gain / an<br>stratégie</th><th scope="col" class="num">Gain / an<br>garder</th>
+          <th scope="col" class="num">Pire chute<br>stratégie</th><th scope="col" class="num">Pire chute<br>garder</th>
+          <th scope="col" class="num">Sharpe<br>stratégie</th><th scope="col" class="num">Sharpe<br>garder</th>
+          <th scope="col">Verdict</th>
+        </tr></thead>
+        <tbody>$bt_rows</tbody>
+      </table>
+    </div>
+    <div class="two">
+      <div class="chart-card">
+        <h3>Valeur de 100 € investis</h3>
+        <ul class="legend" id="eq-legend"></ul>
+        <div class="chart" id="eq-chart"></div>
+        <details><summary>Voir les données (fin de mois)</summary><div class="table-scroll" id="eq-table"></div></details>
+      </div>
+      <div class="chart-card">
+        <h3>Chute depuis le dernier plus haut</h3>
+        <ul class="legend" id="dd-legend"></ul>
+        <div class="chart" id="dd-chart"></div>
+        <details><summary>Voir les données (fin de mois)</summary><div class="table-scroll" id="dd-table"></div></details>
+      </div>
+    </div>
+    <p class="note">Échelle logarithmique pour la valeur : un même écart vertical correspond à un même pourcentage de gain.
+      Les performances passées ne garantissent rien. La stratégie réduit surtout les grosses chutes ; elle ne rend pas riche rapidement.</p>
+  </section>
+
+  <section aria-labelledby="lex-h">
+    <h2 id="lex-h">Lexique</h2>
+    <dl class="lexique">
+      <div><dt>Moyenne mobile 50 / 100 / 200 jours</dt><dd>Prix moyen sur les 50, 100 ou 200 derniers jours. Être au-dessus signifie que le prix monte plus vite que sa tendance passée.</dd></div>
+      <div><dt>RSI</dt><dd>Indicateur de 0 à 100 de la vitesse des mouvements récents (14 jours). Au-dessus de 70 : forte hausse, souvent suivie d'une pause. Sous 30 : forte baisse.</dd></div>
+      <div><dt>Agitation / jour</dt><dd>Variation typique d'une journée sur le dernier mois (écart-type). ±3 % : un jour sur trois environ, le prix bouge de plus de 3 %.</dd></div>
+      <div><dt>Pire chute (drawdown)</dt><dd>Plus forte baisse entre un plus haut et le plus bas qui a suivi. C'est la perte que tu aurais dû supporter sans paniquer.</dd></div>
+      <div><dt>Sharpe</dt><dd>Gain rapporté au risque pris. Plus il est élevé, plus le gain a été obtenu sans montagnes russes. Au-dessus de 1, c'est bon.</dd></div>
+      <div><dt>Backtest et période de test</dt><dd>Simulation sur le passé. La période de test sert à vérifier que la stratégie ne fonctionne pas seulement sur les données qui ont servi à la régler.</dd></div>
+    </dl>
+  </section>
+
+  <p class="muted">Généré par <span class="data">python -m tradingbot report</span>. Outil éducatif, pas un conseil en investissement.
+    Les cryptos peuvent perdre plus de 50 % de leur valeur en quelques mois.</p>
+</div>
+
+<script id="report-data" type="application/json">$data</script>
+<script>
+$script
+</script>

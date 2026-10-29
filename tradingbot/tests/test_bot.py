@@ -206,3 +206,85 @@ def test_jwt_es256_and_ed25519():
     broker = CoinbaseBroker("key-id", base64.b64encode(raw + pub).decode())
     token = broker._jwt("POST", "/api/v3/brokerage/orders")
     assert jwt.decode(token, ed.public_key(), algorithms=["EdDSA"])["sub"] == "key-id"
+
+
+# --- Portefeuille --------------------------------------------------------------
+from tradingbot.portfolio import backtest_weights, momentum_rotation, trend_ensemble  # noqa: E402
+
+
+def daily(**series):
+    n = len(next(iter(series.values())))
+    idx = pd.date_range("2024-01-01", periods=n, freq="D", tz="UTC")
+    return pd.DataFrame({k: np.asarray(v, float) for k, v in series.items()}, index=idx)
+
+
+def test_trend_ensemble_weights():
+    up = np.linspace(100, 300, 300)
+    down = np.linspace(300, 100, 300)
+    w = trend_ensemble(daily(**{"A-EUR": up, "B-EUR": down}), smas=(20, 50, 100))
+    assert w["A-EUR"].iloc[-1] == pytest.approx(0.5)  # 100 % de sa moitié
+    assert w["B-EUR"].iloc[-1] == 0
+    assert w.iloc[:99].sum().sum() == 0 or w["A-EUR"].iloc[:19].sum() == 0  # pas de poids avant la chauffe
+    assert (w.sum(axis=1) <= 1 + 1e-9).all()
+
+
+def test_backtest_weights_no_lookahead_and_fees():
+    closes = daily(**{"A-EUR": [100, 100, 200, 200]})
+    w = pd.DataFrame({"A-EUR": [0, 1, 1, 1]}, index=closes.index, dtype=float)
+    res = backtest_weights(closes, w, fee_pct=1.0, slippage_pct=0, initial=100)
+    # décidé à J1, investi à partir de J2 : le doublement de J2 est capturé, moins 1 % de frais
+    assert res.equity.iloc[-1] == pytest.approx(100 * 2 * 0.99)
+    # Un poids décidé le jour même du saut ne doit PAS capter ce saut
+    w2 = pd.DataFrame({"A-EUR": [0, 0, 1, 1]}, index=closes.index, dtype=float)
+    assert backtest_weights(closes, w2, fee_pct=0, slippage_pct=0).equity.iloc[-1] == pytest.approx(100)
+
+
+def test_momentum_rotation_picks_strongest_and_respects_regime():
+    n = 250
+    closes = daily(**{
+        "BTC-EUR": np.linspace(100, 200, n),
+        "ETH-EUR": np.linspace(100, 400, n),
+        "XRP-EUR": np.linspace(100, 50, n),
+    })
+    w = momentum_rotation(closes, lookback=30, top=1, regime_sma=100, rebalance_days=1)
+    assert w.iloc[-1].to_dict() == {"BTC-EUR": 0, "ETH-EUR": 1, "XRP-EUR": 0}
+    closes["BTC-EUR"] = np.linspace(200, 100, n)  # BTC en baisse -> tout en cash
+    w = momentum_rotation(closes, lookback=30, top=1, regime_sma=100, rebalance_days=1)
+    assert w.iloc[-1].sum() == 0
+
+
+def test_portfolio_bot_rebalances(tmp_path, monkeypatch):
+    cfg = Config(products=["BTC-EUR", "ETH-EUR"], capital=100, strategy="trend_ensemble",
+                 strategy_params={"smas": [5]}, state_file=str(tmp_path / "s.json"),
+                 journal_file=str(tmp_path / "t.csv"), risk=RiskConfig(min_order_quote=5))
+    broker = FakeBroker(100.0)
+    b = bot_mod.make_bot(cfg, broker)
+    assert isinstance(b, bot_mod.PortfolioBot)
+
+    targets = iter([({"BTC-EUR": 0.5, "ETH-EUR": 0.5}, "d1"), ({"BTC-EUR": 0.5, "ETH-EUR": 0.5}, "d1"),
+                    ({"BTC-EUR": 0.25, "ETH-EUR": 0.0}, "d2")])
+    monkeypatch.setattr(b, "target_weights", lambda: next(targets))
+    b.step()
+    assert [o[0] for o in broker.orders] == ["BUY", "BUY"]
+    assert b.state.cash == pytest.approx(0.25, abs=0.01)  # marge de sécurité sur le dernier achat
+    b.step()  # même journée : rien
+    assert len(broker.orders) == 2
+    b.step()  # ETH vendu entièrement, BTC réduit de moitié
+    assert "ETH-EUR" not in b.state.positions
+    btc = b.state.positions["BTC-EUR"]
+    assert btc.qty * 100 == pytest.approx(b.equity({"BTC-EUR": 100, "ETH-EUR": 100}) * 0.25, rel=0.05)
+
+
+# --- Rapport -------------------------------------------------------------------
+def test_report_metrics_and_summary():
+    from tradingbot.report import asset_comment, asset_metrics, market_summary
+
+    up = candles(np.linspace(100, 300, 400))
+    down = candles(np.linspace(300, 100, 400))
+    mu, md = asset_metrics("BTC-EUR", up), asset_metrics("ETH-EUR", down)
+    assert mu["trend"] == 3 and md["trend"] == 0
+    assert mu["p30"] > 0 > md["p30"]
+    assert md["drawdown"] == pytest.approx(-64.6, abs=0.5)  # plus haut des 365 derniers jours
+    assert "baissière" in asset_comment(md)
+    s = market_summary([mu, md])
+    assert s["breadth"] == 1 and s["verdict"]

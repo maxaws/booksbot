@@ -125,11 +125,10 @@ class TradingBot:
         log.info("VENTE %s (%s) : %.8g @ %.2f -> P&L %+.2f", product, reason, fill.base_qty, fill.price, pnl)
 
     # --- Cycle ---------------------------------------------------------------
-    def step(self) -> None:
+    def _risk_gate(self, prices: dict[str, float]) -> bool:
+        """Mise à jour du suivi journalier + coupe-circuit. False = ne rien faire de plus."""
         st = self.state
-        prices = {p: self.broker.get_price(p) for p in self.cfg.products}
         equity = self.equity(prices)
-
         today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         if st.day != today:
             st.day, st.day_start_equity = today, equity
@@ -137,7 +136,7 @@ class TradingBot:
 
         if st.halted:
             log.warning("Robot en pause : %s. Lance `python -m tradingbot reset` après analyse.", st.halt_reason)
-            return
+            return False
 
         if self.risk.drawdown_breached(equity, st.peak_equity):
             log.error("COUPE-CIRCUIT : capital %.2f < plus haut %.2f - %.0f %%", equity, st.peak_equity, self.cfg.risk.max_drawdown_pct)
@@ -145,6 +144,13 @@ class TradingBot:
                 self._close(product, "coupe-circuit")
             st.halted, st.halt_reason = True, f"drawdown > {self.cfg.risk.max_drawdown_pct} %"
             st.save(self.state_path)
+            return False
+        return True
+
+    def step(self) -> None:
+        st = self.state
+        prices = {p: self.broker.get_price(p) for p in self.cfg.products}
+        if not self._risk_gate(prices):
             return
 
         for product in self.cfg.products:
@@ -195,3 +201,111 @@ class TradingBot:
             except Exception:
                 log.exception("Erreur pendant le cycle (nouvel essai au prochain cycle)")
             time.sleep(self.cfg.poll_seconds)
+
+
+class PortfolioBot(TradingBot):
+    """Rééquilibrage quotidien vers la répartition cible d'une stratégie de
+    portefeuille (voir ``portfolio.py``), une fois par bougie journalière clôturée
+    (peu après minuit UTC). Pas de stop-loss par position : c'est la stratégie
+    qui réduit l'exposition quand la tendance se dégrade ; le coupe-circuit
+    global reste actif.
+    """
+
+    def __init__(self, cfg: Config, broker: Broker):
+        from .portfolio import PORTFOLIO_STRATEGIES
+
+        self.cfg = cfg
+        self.broker = broker
+        self.strategy_fn = PORTFOLIO_STRATEGIES[cfg.strategy]
+        self.risk = RiskManager(cfg.risk)
+        self.state_path = Path(cfg.state_file)
+        self.journal_path = Path(cfg.journal_file)
+        self.state = State.load(self.state_path, cfg.capital)
+        smas = cfg.strategy_params.get("smas", (200,))
+        self.history = max(smas) + 90
+
+    def target_weights(self) -> tuple[dict[str, float], str]:
+        import pandas as pd
+
+        closes = pd.DataFrame({
+            p: data.recent_closed_candles(p, "ONE_DAY", self.history)["close"] for p in self.cfg.products
+        })
+        weights = self.strategy_fn(closes, **self.cfg.strategy_params).iloc[-1]
+        return {p: float(weights.get(p, 0.0)) for p in self.cfg.products}, closes.index[-1].isoformat()
+
+    def _buy(self, product: str, amount: float) -> None:
+        fill = self.broker.market_buy(product, amount)
+        cost = fill.quote_amount + fill.fee
+        self.state.cash -= cost
+        pos = self.state.positions.get(product)
+        if pos is None:
+            self.state.positions[product] = Position(
+                product, fill.base_qty, fill.price, cost, stop=0.0, take_profit=0.0,
+                opened_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            )
+        else:
+            pos.qty += fill.base_qty
+            pos.cost += cost
+            pos.entry_price = pos.cost / pos.qty
+        self.state.save(self.state_path)
+        self._journal(fill, "rééquilibrage")
+        log.info("ACHAT %s : %.8g @ %.2f (%.2f)", product, fill.base_qty, fill.price, cost)
+
+    def _sell(self, product: str, qty: float, reason: str) -> None:
+        pos = self.state.positions[product]
+        if qty >= pos.qty * 0.999:
+            return self._close(product, reason)
+        fill = self.broker.market_sell(product, qty)
+        proceeds = fill.quote_amount - fill.fee
+        cost_part = pos.cost * fill.base_qty / pos.qty
+        pnl = proceeds - cost_part
+        pos.qty -= fill.base_qty
+        pos.cost -= cost_part
+        self.state.cash += proceeds
+        self.state.realized_pnl += pnl
+        self.state.save(self.state_path)
+        self._journal(fill, reason, pnl)
+        log.info("VENTE %s (%s) : %.8g @ %.2f -> P&L %+.2f", product, reason, fill.base_qty, fill.price, pnl)
+
+    def step(self) -> None:
+        st = self.state
+        prices = {p: self.broker.get_price(p) for p in self.cfg.products}
+        if not self._risk_gate(prices):
+            return
+        weights, candle_id = self.target_weights()
+        if st.last_signal_candle.get("portfolio") == candle_id:
+            return  # déjà rééquilibré pour cette journée
+        equity = self.equity(prices)
+        threshold = max(self.cfg.risk.min_order_quote, equity * self.cfg.rebalance_threshold_pct / 100)
+        diffs = {}
+        for p, w in weights.items():
+            pos = st.positions.get(p)
+            current = pos.qty * prices[p] if pos else 0.0
+            diffs[p] = w * equity - current
+        log.info("Répartition cible : %s", ", ".join(f"{p} {w:.0%}" for p, w in weights.items()))
+
+        # Ventes d'abord (libère du cash), puis achats
+        for p, diff in sorted(diffs.items(), key=lambda kv: kv[1]):
+            pos = st.positions.get(p)
+            if diff < 0 and pos and (weights[p] == 0 or -diff >= threshold):
+                self._sell(p, pos.qty if weights[p] == 0 else -diff / prices[p], "rééquilibrage")
+            elif diff >= threshold:
+                ok, why = self.risk.can_open(0, self.equity(prices), st.day_start_equity)
+                cash = min(st.cash, self.broker.available_quote(self.cfg.quote_currency)) * 0.995
+                amount = min(diff, cash)
+                if not ok:
+                    log.info("%s : achat ignoré (%s)", p, why)
+                elif amount >= self.cfg.risk.min_order_quote:
+                    self._buy(p, amount)
+
+        st.last_signal_candle["portfolio"] = candle_id
+        st.save(self.state_path)
+        log.info("Capital %.2f %s | cash %.2f | positions %s | P&L réalisé %+.2f",
+                 self.equity(prices), self.cfg.quote_currency, st.cash,
+                 {p: round(x.qty * prices[p], 2) for p, x in st.positions.items()} or "-", st.realized_pnl)
+
+
+def make_bot(cfg: Config, broker: Broker) -> TradingBot:
+    from .portfolio import PORTFOLIO_STRATEGIES
+
+    return (PortfolioBot if cfg.strategy in PORTFOLIO_STRATEGIES else TradingBot)(cfg, broker)

@@ -12,8 +12,10 @@ Robot de trading automatique pour la crypto sur **Coinbase Advanced Trade**, ave
 - journal CSV de tous les trades et état persistant (reprise après redémarrage).
 
 > ⚠️ **À lire avant tout** : voir la section [Résultats et avertissements](#résultats-et-avertissements).
-> Aucune stratégie fournie n'est rentable en backtest une fois les frais déduits.
-> Le robot est un outil solide pour **tester** des idées, pas une machine à gagner de l'argent.
+> Les stratégies intraday (minutes, heures) perdent de l'argent en backtest à cause des frais.
+> La stratégie recommandée, `trend_ensemble`, décide une fois par jour. Sur la période de test,
+> elle a gagné autant ou plus que garder ses cryptos, avec des chutes environ moitié moins fortes.
+> Elle ne rend pas riche rapidement, et elle a quand même connu des baisses de 30 à 50 %.
 
 ## Installation
 
@@ -26,11 +28,25 @@ cp config.example.yaml config.yaml
 
 ## Utilisation, étape par étape
 
+### 0. Rapport de marché (aucune clé nécessaire)
+
+```bash
+python -m tradingbot report         # -> data/rapport.html, à ouvrir dans le navigateur
+```
+
+Données Coinbase à jour, expliquées en français :
+- l'état du marché ;
+- chaque crypto : performances, tendance, RSI, agitation, chute depuis le plus haut ;
+- la répartition que viserait le robot aujourd'hui ;
+- la preuve par backtest, avec graphiques et lexique.
+
+Relance-le quand tu veux pour l'actualiser.
+
 ### 1. Backtester (aucune clé nécessaire)
 
 ```bash
-python -m tradingbot backtest --days 365
-python -m tradingbot backtest --product ETH-EUR --days 120 --trades   # détail des trades
+python -m tradingbot backtest --days 2400                    # stratégie de config.yaml
+python -m tradingbot backtest --product BTC-EUR --days 2400
 ```
 
 Compare toujours le rendement à la ligne **buy&hold** (acheter et garder) : une
@@ -72,7 +88,7 @@ Tout se règle dans `config.yaml` (commenté). Les points clés :
 |---|---|
 | `products` | paires Coinbase, même devise (ex. `BTC-EUR`, `ETH-EUR`) |
 | `granularity` | taille des bougies (`FIFTEEN_MINUTE`, `ONE_HOUR`, `SIX_HOUR`...) |
-| `strategy` | `ema_cross` (tendance) ou `mean_reversion` (achat de repli) |
+| `strategy` | `trend_ensemble` (recommandée), `trend_filter`, `momentum_rotation`, `ema_cross`, `mean_reversion` |
 | `capital` | budget max utilisé par le robot |
 | `risk.risk_per_trade_pct` | perte si le stop est touché, en % du capital |
 | `fee_pct` | frais taker de **ton** palier Coinbase (à vérifier dans ton compte) |
@@ -84,7 +100,9 @@ tradingbot/
   indicators.py     EMA, RSI, ATR, Bollinger
   strategies.py     stratégies (mêmes signaux en backtest et en live)
   risk.py           taille de position, limites, coupe-circuit
-  backtest.py       simulateur
+  backtest.py       simulateur (stratégies intraday)
+  portfolio.py      stratégies journalières de portefeuille + leur backtest
+  report.py         rapport de marché HTML (+ report_template.html, report_charts.js)
   bot.py            boucle de trading + registre persistant
   data.py           données de marché Coinbase (publiques)
   brokers/          paper (simulé), coinbase (réel)
@@ -95,6 +113,29 @@ Pour ajouter une stratégie : une classe dans `strategies.py` qui renvoie les
 colonnes `entry`, `exit`, `stop_dist`, `tp_dist`, puis l'ajouter à `STRATEGIES`.
 
 ## Résultats et avertissements
+
+### Stratégie recommandée : `trend_ensemble`
+
+La stratégie suit la tendance de façon progressive. Pour chaque crypto, la part investie dépend
+du nombre de moyennes mobiles (50, 100 et 200 jours) que le prix dépasse : 0, un tiers, deux tiers
+ou la totalité. Une marge de 2 % évite les allers-retours inutiles. Le robot décide une fois par
+jour, après la clôture de minuit UTC.
+
+Méthode : les réglages ont été choisis sur la période 2020-2023, puis vérifiés sur 2024-2026,
+une période que la stratégie n'avait jamais vue. Frais de 1,2 % par ordre inclus.
+
+| BTC + ETH | Gain / an | Pire chute | Sharpe |
+|---|---|---|---|
+| Stratégie, période de test (2024-2026) | +19 % | −33 % | 0,70 |
+| Acheter et garder, même période | +13 % | −59 % | 0,50 |
+| Stratégie, 2020-2026 | +43 % | −49 % | 1,07 |
+| Acheter et garder, 2020-2026 | +40 % | −73 % | 0,86 |
+
+Ce qui n'a **pas** tenu : la rotation vers les cryptos qui ont le plus monté (`momentum_rotation`).
+Elle était excellente sur 2021-2023, puis a perdu de 20 à 70 % sur 2024-2026. C'est le signe d'un
+réglage trop ajusté au passé.
+
+### Stratégies intraday
 
 Backtests réalisés le 29/10/2026 sur données Coinbase réelles, 100 € de capital,
 rendement total sur la période selon le niveau de frais par ordre :

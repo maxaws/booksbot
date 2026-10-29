@@ -22,6 +22,8 @@ class Config:
     risk: RiskConfig = field(default_factory=RiskConfig)
     fee_pct: float = 1.2
     slippage_pct: float = 0.05
+    # Stratégies de portefeuille : on ne rééquilibre que si l'écart dépasse ce % du capital
+    rebalance_threshold_pct: float = 5.0
     poll_seconds: int = 30
     state_file: str = "data/state.json"
     journal_file: str = "data/trades.csv"
@@ -38,6 +40,11 @@ class Config:
         quotes = {p.split("-")[1] for p in self.products}
         if len(quotes) != 1:
             raise ValueError(f"Tous les produits doivent avoir la même devise de cotation (trouvé {quotes})")
+        from .portfolio import PORTFOLIO_STRATEGIES
+        from .strategies import STRATEGIES
+
+        if self.strategy not in STRATEGIES and self.strategy not in PORTFOLIO_STRATEGIES:
+            raise ValueError(f"Stratégie inconnue '{self.strategy}'. Choix : {', '.join([*STRATEGIES, *PORTFOLIO_STRATEGIES])}")
         if self.capital <= 0:
             raise ValueError("capital doit être > 0")
 
