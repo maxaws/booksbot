@@ -132,6 +132,21 @@ def backtest_weights(closes: pd.DataFrame, weights: pd.DataFrame, fee_pct: float
     return PortfolioResult(equity, w, float(turnover.sum()), float(cost.sum() * 100))
 
 
+def trend_states(closes: pd.DataFrame, smas=(50, 100, 200), buffer_pct: float = 2.0) -> dict:
+    """Pour chaque moyenne : (état 1 = au-dessus / 0 = en dessous, moyenne mobile).
+
+    Avec la zone tampon, l'état ne bascule que si le prix franchit la moyenne
+    de plus de ``buffer_pct`` %, sinon il garde son état précédent.
+    """
+    out = {}
+    for n in smas:
+        ma = closes.rolling(n, min_periods=n).mean()
+        up, down = closes > ma * (1 + buffer_pct / 100), closes < ma * (1 - buffer_pct / 100)
+        state = pd.DataFrame(np.where(up, 1.0, np.where(down, 0.0, np.nan)), index=closes.index, columns=closes.columns)
+        out[n] = (state.ffill().fillna(0), ma)
+    return out
+
+
 def trend_ensemble(
     closes: pd.DataFrame,
     smas: tuple[int, ...] = (50, 100, 200),
@@ -148,13 +163,8 @@ def trend_ensemble(
     - ``check_days`` : fréquence de décision (7 = une fois par semaine).
     Poids égaux entre les actifs du panier.
     """
-    scores = []
-    for n in smas:
-        ma = closes.rolling(n, min_periods=n).mean()
-        up, down = closes > ma * (1 + buffer_pct / 100), closes < ma * (1 - buffer_pct / 100)
-        state = pd.DataFrame(np.where(up, 1.0, np.where(down, 0.0, np.nan)), index=closes.index, columns=closes.columns)
-        scores.append(state.ffill().fillna(0))
-    score = sum(scores) / len(smas)
+    states = trend_states(closes, smas, buffer_pct)
+    score = sum(st for st, _ in states.values()) / len(smas)
     if vol_target:
         vol = closes.pct_change(fill_method=None).rolling(30).std() * np.sqrt(365)
         score = score * (vol_target / vol).clip(upper=1).fillna(0)

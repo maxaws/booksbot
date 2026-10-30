@@ -98,6 +98,10 @@ tbody tr.comment td { padding-top: 0; color: var(--ink-2); font-size: 13px; bord
 tbody tr.comment:last-child td { border-bottom: 0; }
 table.bt tbody tr td, table.bt tbody tr th { border-bottom: 1px solid var(--line); }
 table.bt tbody tr:last-child td, table.bt tbody tr:last-child th { border-bottom: 0; }
+.events { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.ev { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 6px; }
+.ev .pill { justify-self: start; white-space: normal; font-weight: 600; }
+.ev p { color: var(--ink-2); font-size: 14px; }
 .trend-cell { white-space: nowrap; }
 .dots { display: inline-flex; gap: 3px; margin-left: 8px; vertical-align: middle; }
 .dots i { width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid var(--ink-3); }
@@ -125,6 +129,11 @@ details td, details th { padding: 4px 10px; }
     <p class="lead">$summary</p>
   </header>
 
+  <section aria-labelledby="ev-h">
+    <h2 id="ev-h">Ce qui bouge en ce moment</h2>
+    <ul class="events">$events</ul>
+  </section>
+
   <div class="kpis" role="list">
     <div class="kpi" role="listitem"><span class="l">Bitcoin</span><span class="v">$btc_price</span><span class="l">$btc_p30 sur 30 jours</span></div>
     <div class="kpi" role="listitem"><span class="l">Cryptos en tendance de fond haussière</span><span class="v">$breadth / $n</span><span class="l">au-dessus de leur moyenne 200 j</span></div>
@@ -139,6 +148,7 @@ details td, details th { padding: 4px 10px; }
       les prix passent au-dessus de leurs moyennes 50, 100 et 200 jours, et la réduit quand ils repassent en dessous.</p>
     <div class="alloc" role="img" aria-label="Répartition visée">$alloc_bar</div>
     <ul class="legend">$alloc_legend</ul>
+    $levels
     <p class="muted">La stratégie garde une marge de 2 % autour de chaque moyenne : elle ne réduit une position que si le prix
       passe nettement en dessous. Sa répartition peut donc différer un peu de la colonne « Tendance » du tableau ci-dessous.</p>
   </section>

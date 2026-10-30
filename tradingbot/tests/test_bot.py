@@ -288,3 +288,19 @@ def test_report_metrics_and_summary():
     assert "baissière" in asset_comment(md)
     s = market_summary([mu, md])
     assert s["breadth"] == 1 and s["verdict"]
+
+
+def test_report_events_detect_broad_selloff_and_robot_levels():
+    from tradingbot.report import market_events, robot_levels
+
+    base = {"p30": -15.0, "vol_ratio": 2.0, "range24": 10.0, "vol_day": 2.0, "rsi": 31.0, "crosses": []}
+    metrics = [dict(base, symbol=s, name=s, p48h=-6.0) for s in ("BTC", "ETH", "SOL")]
+    titles = " ".join(e["title"] for e in market_events(metrics))
+    assert "Baisse généralisée" in titles and "Volumes" in titles and "survente" in titles
+
+    cfg = Config(products=["BTC-EUR"], strategy="trend_ensemble",
+                 strategy_params={"smas": [5, 10], "buffer_pct": 2})
+    closes = daily(**{"BTC-EUR": list(np.linspace(100, 200, 40)) + [200]})
+    lv = robot_levels(cfg, closes)[0]
+    assert lv["buy"] is None and lv["sell"]["level"] < 200  # tout investi : seul un seuil de vente existe
+    assert lv["now_pct"] == 100 and lv["after_sell_pct"] == 50
